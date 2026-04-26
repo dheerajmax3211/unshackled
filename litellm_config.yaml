@@ -1,0 +1,24 @@
+model_list:
+  - model_name: claude-sonnet-20250514
+    litellm_params:
+      model: openrouter/qwen/qwen3.6-plus
+      api_key: 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
+      extra_headers:
+        X-OpenRouter-Cache: "1"
+
+  - model_name: claude-opus-20250514
+    litellm_params:
+      model: openrouter/qwen/qwen3.6-plus
+      api_key: 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
+      extra_headers:
+        X-OpenRouter-Cache: "1"
+
+  - model_name: claude-haiku-20250514
+    litellm_params:
+      model: openrouter/qwen/qwen3.6-plus
+      api_key: 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
+      extra_headers:
+        X-OpenRouter-Cache: "1"
+
+litellm_settings:
+  drop_params: true # strips unsupported params like cache_control before forwarding

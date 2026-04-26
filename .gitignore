@@ -1,0 +1,33 @@
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.next/
+out/
+build/
+dist/
+.env
+.env.local
+
+# Java
+target/
+*.class
+*.jar
+*.war
+.classpath
+.project
+.settings/
+
+# macOS
+.DS_Store
+
+# Misc
+.gemini/
+logs/
+reports/frontend/.DS_Store
