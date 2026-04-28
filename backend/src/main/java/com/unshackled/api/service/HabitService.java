@@ -48,11 +48,11 @@ public class HabitService {
         com.unshackled.api.model.UserModel user = userRepository.findById(uId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", uId));
         
-        if (!"premium".equals(user.premiumStatus())) {
+        if (!"premium".equals(user.premiumStatus()) && !Boolean.TRUE.equals(user.isSupporter())) {
             int activeCount = userHabitRepository.countActiveByUserId(uId);
             if (activeCount >= 1) {
                 throw new com.unshackled.api.exception.PremiumRequiredException(
-                    "Free tier users can only track one active habit. Please upgrade to Sovereign premium for unlimited habits."
+                    "Free tier users can only track one active habit. Please upgrade to Sovereign premium or become a supporter for unlimited habits."
                 );
             }
         }

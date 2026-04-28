@@ -66,7 +66,7 @@ public class JournalRepository {
 
         return jdbcTemplate.execute(sql, (PreparedStatement ps) -> {
             ps.setObject(1, model.userId());
-            ps.setObject(2, model.entryDate());
+            ps.setDate(2, java.sql.Date.valueOf(model.entryDate()));
             ps.setString(3, model.content());
             ps.setObject(4, model.moodScore());
             ps.setString(5, model.moodEmoji());
@@ -91,7 +91,7 @@ public class JournalRepository {
     public Optional<JournalEntryModel> findByUserIdAndDate(UUID userId, LocalDate date) {
         String sql = "SELECT * FROM journal_entries WHERE user_id = ? AND entry_date = ?";
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, userId, date));
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, userId, java.sql.Date.valueOf(date)));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

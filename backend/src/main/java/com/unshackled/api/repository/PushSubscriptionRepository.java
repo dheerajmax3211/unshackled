@@ -20,19 +20,18 @@ public class PushSubscriptionRepository {
             rs.getObject("id", UUID.class),
             rs.getObject("user_id", UUID.class),
             rs.getString("endpoint"),
-            rs.getString("p256dh"),
-            rs.getString("auth"),
+            rs.getString("p256dh_key"),
+            rs.getString("auth_key"),
             rs.getObject("created_at", OffsetDateTime.class)
     );
 
     public void insert(UUID userId, String endpoint, String p256dh, String auth) {
         String sql = """
-            INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+            INSERT INTO push_subscriptions (user_id, endpoint, p256dh_key, auth_key)
             VALUES (?, ?, ?, ?)
-            ON CONFLICT (endpoint) DO UPDATE 
-            SET user_id = EXCLUDED.user_id,
-                p256dh = EXCLUDED.p256dh,
-                auth = EXCLUDED.auth,
+            ON CONFLICT (user_id, endpoint) DO UPDATE 
+            SET p256dh_key = EXCLUDED.p256dh_key,
+                auth_key = EXCLUDED.auth_key,
                 created_at = NOW()
         """;
         jdbcTemplate.update(sql, userId, endpoint, p256dh, auth);

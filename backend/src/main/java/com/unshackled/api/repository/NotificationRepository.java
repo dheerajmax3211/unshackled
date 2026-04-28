@@ -55,13 +55,22 @@ public class NotificationRepository {
         return jdbcTemplate.query(sql, rowMapper, userId);
     }
 
+    public java.util.Optional<NotificationModel> findById(UUID id) {
+        String sql = "SELECT * FROM notifications WHERE id = ?";
+        try {
+            return java.util.Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, id));
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return java.util.Optional.empty();
+        }
+    }
+
     public void markRead(UUID notificationId) {
         String sql = "UPDATE notifications SET is_read = TRUE WHERE id = ?";
         jdbcTemplate.update(sql, notificationId);
     }
 
-    public void markAllRead(UUID userId) {
+    public int markAllRead(UUID userId) {
         String sql = "UPDATE notifications SET is_read = TRUE WHERE user_id = ? AND is_read = FALSE";
-        jdbcTemplate.update(sql, userId);
+        return jdbcTemplate.update(sql, userId);
     }
 }

@@ -1,6 +1,7 @@
 package com.unshackled.api.service;
 
 import com.unshackled.api.dto.JournalEntryRequest;
+import com.unshackled.api.dto.JournalResponse;
 import com.unshackled.api.model.JournalEntryModel;
 import com.unshackled.api.repository.JournalRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +29,7 @@ public class JournalService {
      * Saves or updates a journal entry and awards XP if it's the first time for this date.
      */
     @Transactional
-    public UUID saveEntry(String userId, JournalEntryRequest request) {
+    public JournalResponse saveEntry(String userId, JournalEntryRequest request) {
         UUID uId = UUID.fromString(userId);
         
         // Check if entry already exists to determine if we should award XP
@@ -50,18 +51,23 @@ public class JournalService {
         );
 
         UUID entryId = journalRepository.upsert(model);
+        int xpEarned = 0;
+        String message = isNewEntry ? "Journal entry created successfully" : "Journal entry updated successfully";
 
         if (isNewEntry) {
             // Award XP for the journal entry
             xpService.awardXp(userId, "journal_entry", XpService.JOURNAL_ENTRY, entryId, "Journal entry for " + request.entryDate());
+            xpEarned += XpService.JOURNAL_ENTRY;
             
             // Award XP for mood logging if provided
             if (request.moodScore() != null) {
                 xpService.awardXp(userId, "mood_logged", XpService.MOOD_LOGGED, entryId, "Mood logged for " + request.entryDate());
+                xpEarned += XpService.MOOD_LOGGED;
             }
+            message += ". XP awarded!";
         }
 
-        return entryId;
+        return new JournalResponse(entryId, message, request.entryDate(), xpEarned);
     }
 
     public List<JournalEntryModel> getEntries(String userId, int limit) {

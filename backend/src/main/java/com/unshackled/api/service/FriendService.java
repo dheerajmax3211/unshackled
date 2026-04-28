@@ -45,12 +45,12 @@ public class FriendService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", reqId));
 
         // Task B-19.9: Premium gating check
-        boolean isPremium = "premium".equalsIgnoreCase(requester.premiumStatus());
-        if (!isPremium) {
+        boolean isPremiumOrSupporter = "premium".equalsIgnoreCase(requester.premiumStatus()) || Boolean.TRUE.equals(requester.isSupporter());
+        if (!isPremiumOrSupporter) {
             int friendCount = friendRepository.countAcceptedByUserId(reqId);
             if (friendCount >= 3) {
                 throw new com.unshackled.api.exception.PremiumRequiredException(
-                    "Free tier users can only have up to 3 friends. Please upgrade to Sovereign premium for unlimited friends."
+                    "Free tier users can only have up to 3 friends. Please upgrade to Sovereign premium or become a supporter for unlimited friends."
                 );
             }
         }
@@ -103,10 +103,11 @@ public class FriendService {
             // Fix #18: Enforce premium check on the addressee as well
             UserModel acceptingUser = userRepository.findById(uId)
                     .orElseThrow(() -> new ResourceNotFoundException("User", "id", uId));
-            if (!"premium".equalsIgnoreCase(acceptingUser.premiumStatus())) {
+            boolean isPremiumOrSupporterAcceptor = "premium".equalsIgnoreCase(acceptingUser.premiumStatus()) || Boolean.TRUE.equals(acceptingUser.isSupporter());
+            if (!isPremiumOrSupporterAcceptor) {
                 int acceptingFriendCount = friendRepository.countAcceptedByUserId(uId);
                 if (acceptingFriendCount >= 3) {
-                    throw new PremiumRequiredException("Free-tier users can have a maximum of 3 friends. Upgrade to unlock unlimited connections.");
+                    throw new PremiumRequiredException("Free-tier users can have a maximum of 3 friends. Upgrade or become a supporter to unlock unlimited connections.");
                 }
             }
             

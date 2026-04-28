@@ -666,7 +666,12 @@ BEGIN
     INSERT INTO health_milestones (habit_id, day_offset, title, description) VALUES
         (smoking_id, 1, 'CO Levels Normal', 'Carbon monoxide levels in your blood have dropped to normal.'),
         (smoking_id, 2, 'Nerve Endings Regrow', 'Your ability to smell and taste is enhanced as nerve endings start to regrow.'),
-        (smoking_id, 90, 'Circulation Improved', 'Walking becomes easier and your lung function increases significantly.');
+        (smoking_id, 3, 'Breathing Easier', 'Your bronchial tubes have started to relax, making breathing easier and increasing energy levels.'),
+        (smoking_id, 14, 'Circulation Improving', 'Blood flow to your hands and feet has improved significantly. Your lungs are starting to clear out mucus.'),
+        (smoking_id, 30, 'Lungs Regenerating', 'Cilia (tiny hair-like structures) in your lungs have started to regrow, helping to clean the lungs and reduce infection risk.'),
+        (smoking_id, 90, 'Circulation Improved', 'Walking becomes easier and your lung function increases significantly.'),
+        (smoking_id, 180, 'Coughing Decreased', 'The smoker''s cough and shortness of breath have decreased significantly as lung function continues to improve.'),
+        (smoking_id, 365, 'Heart Risk Halved', 'Your risk of coronary heart disease is now half that of someone who still smokes.');
 
     -- DRINKING
     INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
@@ -686,6 +691,23 @@ BEGIN
     INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
         (sugar_id, 3, 'The "Sugar Flu". You might feel tired or headachy. Your body is switching to fat-burning mode.'),
         (sugar_id, 10, 'Cravings are subsiding. You no longer need a sweet treat to feel normal.');
+
+    -- MONEY SUGGESTIONS (Contextual rewards for India)
+    INSERT INTO money_suggestions (country_code, amount_min, amount_max, suggestion, category) VALUES
+        ('IN', 0, 100, 'A hot cup of filter coffee!', 'Food'),
+        ('IN', 101, 500, 'A delicious Masala Dosa and some sweets.', 'Food'),
+        ('IN', 501, 1500, 'A movie ticket with popcorn for you and a friend.', 'Entertainment'),
+        ('IN', 1501, 3000, 'A nice dinner for two at a good restaurant.', 'Food'),
+        ('IN', 3001, 6000, 'A high-quality pair of running shoes.', 'Fitness'),
+        ('IN', 6001, 12000, 'A weekend getaway to a nearby hill station.', 'Travel'),
+        ('IN', 12001, 25000, 'A mid-range smartphone or a tablet.', 'Tech'),
+        ('IN', 25001, 50000, 'A premium smartwatch or a domestic flight trip.', 'Lifestyle'),
+        ('IN', 50001, 80000, 'The latest iPhone or a high-end work laptop.', 'Tech'),
+        ('IN', 80001, 150000, 'A week-long international trip to Thailand or Vietnam.', 'Travel'),
+        ('IN', 150001, 300000, 'A down payment for a brand new car.', 'Lifestyle'),
+        ('IN', 300001, 600000, 'A premium Royal Enfield or a major home renovation.', 'Lifestyle'),
+        ('IN', 600001, 1000000, 'A complete debt-free milestone or a significant investment portfolio.', 'Finance'),
+        ('IN', 1000001, 5000000, 'A down payment for your dream home.', 'Finance');
 
 END $$;
 ```

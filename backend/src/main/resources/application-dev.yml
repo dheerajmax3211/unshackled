@@ -25,9 +25,9 @@ stripe:
   price-id: ${STRIPE_PRICE_ID:price_placeholder}
 
 webpush:
-  public-key: ${WEBPUSH_PUBLIC_KEY:placeholder}
-  private-key: ${WEBPUSH_PRIVATE_KEY:placeholder}
-  subject: mailto:placeholder@example.com
+  public-key: ${VAPID_PUBLIC_KEY:placeholder}
+  private-key: ${VAPID_PRIVATE_KEY:placeholder}
+  subject: ${VAPID_SUBJECT:mailto:placeholder@example.com}
 
 resend:
   api-key: ${RESEND_API_KEY:re_placeholder}

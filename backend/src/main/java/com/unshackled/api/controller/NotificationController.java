@@ -1,5 +1,6 @@
 package com.unshackled.api.controller;
 
+import com.unshackled.api.exception.ResourceNotFoundException;
 import com.unshackled.api.model.NotificationModel;
 import com.unshackled.api.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -26,15 +28,28 @@ public class NotificationController {
     }
 
     @PutMapping("/{id}/read")
-    public ResponseEntity<Void> markRead(@PathVariable UUID id) {
+    public ResponseEntity<Map<String, String>> markRead(@PathVariable UUID id) {
+        NotificationModel notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
+        
         notificationRepository.markRead(id);
-        return ResponseEntity.ok().build();
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Notification '" + notification.title() + "' marked as read",
+            "type", notification.type()
+        ));
     }
 
     @PutMapping("/read-all")
-    public ResponseEntity<Void> markAllRead(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> markAllRead(Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getName());
-        notificationRepository.markAllRead(userId);
-        return ResponseEntity.ok().build();
+        int count = notificationRepository.markAllRead(userId);
+        
+        return ResponseEntity.ok(Map.of(
+            "message", count > 0 
+                ? "Successfully marked " + count + " notifications as read" 
+                : "No unread notifications to mark",
+            "count", count
+        ));
     }
 }

@@ -1,6 +1,8 @@
 package com.unshackled.api.controller;
 
 import com.unshackled.api.dto.JournalEntryRequest;
+import com.unshackled.api.dto.JournalResponse;
+import com.unshackled.api.exception.ResourceNotFoundException;
 import com.unshackled.api.model.JournalEntryModel;
 import com.unshackled.api.service.JournalService;
 import jakarta.validation.Valid;
@@ -25,7 +27,7 @@ public class JournalController {
     private final JournalService journalService;
 
     @PostMapping
-    public ResponseEntity<UUID> saveEntry(
+    public ResponseEntity<JournalResponse> saveEntry(
             @AuthenticationPrincipal String userId,
             @Valid @RequestBody JournalEntryRequest request) {
         return ResponseEntity.ok(journalService.saveEntry(userId, request));
@@ -44,7 +46,7 @@ public class JournalController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return journalService.getEntry(userId, date)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResourceNotFoundException("Journal entry not found for date: " + date));
     }
 
     @GetMapping("/shared")
