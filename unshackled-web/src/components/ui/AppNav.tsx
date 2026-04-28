@@ -51,8 +51,12 @@ export default function AppNav() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block text-left">
-                  <p className="text-xs font-bold text-white leading-tight">{user?.displayName}</p>
-                  <p className="text-[10px] text-slate-500 uppercase tracking-widest leading-tight">Level 12 Warrior</p>
+                  <p className="text-xs font-bold text-white leading-tight">
+                    {user?.displayName || "Warrior"}
+                  </p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest leading-tight">
+                    {user?.onboardingCompleted ? "Active Member" : "New Soul"}
+                  </p>
                 </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-slate-900/95 backdrop-blur-xl border-white/10 shadow-2xl">

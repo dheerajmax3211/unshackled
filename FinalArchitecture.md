@@ -1321,6 +1321,7 @@ CREATE POLICY "Users manage own push subs" ON push_subscriptions
 - [x] **Task F-11.3** Create `src/components/analytics/MoneySavedChart.tsx` — line chart using `recharts`. X-axis: time. Y-axis: cumulative money saved. Gradient fill. Blue color scheme.
 - [x] **Task F-11.4** Create `src/components/analytics/StreakStatsCard.tsx` — shows: current streak, longest streak, total clean days, total money saved (all-time), check-in rate (% of days checked in since quit date).
 - [x] **Task F-11.5** Create `src/components/analytics/MoodTrendChart.tsx` — bar chart of mood scores over time. Color gradient from rose (low mood) to green (high mood).
+- [ ] **Task F-11.6** Implement `MoneyTimeSeriesChart.tsx` — uses the new `/api/analytics/money/{id}/series` endpoint to render a multi-period line chart with toggle switches for 7D, 4W, and 12M views. Use `recharts` for smooth area gradients.
 
 ---
 

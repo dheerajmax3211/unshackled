@@ -17,6 +17,10 @@ public record CheckInRequest(
         @Pattern(regexp = "^(clean|slipped)$", message = "Status must be 'clean' or 'slipped'")
         String status,
 
+        String mood,
+
+        String slipReason,
+
         String note,
 
         LocalDate checkinDate

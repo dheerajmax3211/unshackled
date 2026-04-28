@@ -13,7 +13,8 @@ export default function StepFive_VapingConfig() {
   const router = useRouter();
   const { habitConfigs, setHabitConfig } = useOnboardingStore();
   
-  const config = habitConfigs["vaping"] || { podsPerWeek: 3, podCost: 450 };
+  const defaultConfig = { podsPerWeek: 3, podCost: 450 };
+  const config = { ...defaultConfig, ...(habitConfigs["vaping"] || {}) };
 
   const weeklySpend = (config.podsPerWeek || 0) * (config.podCost || 0);
 

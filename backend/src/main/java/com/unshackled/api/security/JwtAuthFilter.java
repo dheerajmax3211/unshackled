@@ -45,6 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final SupabaseJwtProperties supabaseProperties;
+    private com.auth0.jwk.JwkProvider jwkProvider;
 
     @Override
     protected void doFilterInternal(
@@ -64,13 +65,40 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String token = authHeader.substring(BEARER_PREFIX.length());
 
         try {
-            // Build verifier with Supabase's HS256 secret
-            Algorithm algorithm = Algorithm.HMAC256(supabaseProperties.getJwtSecret());
+            DecodedJWT decodedJWT = JWT.decode(token);
+            String alg = decodedJWT.getAlgorithm();
+            Algorithm algorithm;
+            
+            if ("HS256".equals(alg)) {
+                // Decode the Base64 JWT secret provided by Supabase
+                byte[] decodedSecret;
+                try {
+                    decodedSecret = java.util.Base64.getDecoder().decode(supabaseProperties.getJwtSecret());
+                } catch (Exception e) {
+                    decodedSecret = supabaseProperties.getJwtSecret().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                }
+                algorithm = Algorithm.HMAC256(decodedSecret);
+            } else if ("ES256".equals(alg) || "RS256".equals(alg)) {
+                if (jwkProvider == null) {
+                    jwkProvider = new com.auth0.jwk.UrlJwkProvider(
+                            new java.net.URL(supabaseProperties.getUrl() + "/auth/v1/.well-known/jwks.json")
+                    );
+                }
+                com.auth0.jwk.Jwk jwk = jwkProvider.get(decodedJWT.getKeyId());
+                if ("ES256".equals(alg)) {
+                    algorithm = Algorithm.ECDSA256((java.security.interfaces.ECPublicKey) jwk.getPublicKey(), null);
+                } else {
+                    algorithm = Algorithm.RSA256((java.security.interfaces.RSAPublicKey) jwk.getPublicKey(), null);
+                }
+            } else {
+                throw new JWTVerificationException("Unsupported algorithm: " + alg);
+            }
+
             JWTVerifier verifier = JWT.require(algorithm)
                     .acceptLeeway(5) // 5-second leeway for clock skew
                     .build();
 
-            DecodedJWT decodedJWT = verifier.verify(token);
+            decodedJWT = verifier.verify(token);
 
             // Extract the user ID from the 'sub' claim
             String userId = decodedJWT.getSubject();
@@ -95,7 +123,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             log.debug("Authenticated user: {}", userId);
 
-        } catch (JWTVerificationException e) {
+        } catch (Exception e) {
             log.warn("JWT verification failed: {}", e.getMessage());
             sendUnauthorized(response, "Invalid or expired token");
             return;

@@ -56,10 +56,13 @@ public class FriendController {
     }
 
     @DeleteMapping("/{friendId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeFriend(@PathVariable UUID friendId) {
+    public org.springframework.http.ResponseEntity<Map<String, String>> removeFriend(@PathVariable UUID friendId) {
         String authUserId = AuthenticatedUser.requireCurrentUserId();
         friendService.removeFriend(authUserId, friendId);
+        return org.springframework.http.ResponseEntity.ok(Map.of(
+            "message", "Friendship record " + friendId + " has been successfully removed.",
+            "status", "success"
+        ));
     }
 
     @GetMapping("/search")

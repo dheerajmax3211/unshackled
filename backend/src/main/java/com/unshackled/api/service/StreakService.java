@@ -101,7 +101,7 @@ public class StreakService {
         List<UserHabitModel> habits = habitService.getUserHabits(userId);
         return habits.stream()
                 .map(h -> streakRepository.findByUserHabitId(h.id())
-                        .orElse(new StreakModel(null, h.id(), 0, 0, null, 0, null, null)))
+                        .orElse(new StreakModel(null, h.id(), 0, 0, null, 0, h.isActive(), null, null)))
                 .collect(Collectors.toList());
     }
 

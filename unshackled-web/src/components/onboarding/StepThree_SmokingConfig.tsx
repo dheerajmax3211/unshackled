@@ -13,7 +13,8 @@ export default function StepThree_SmokingConfig() {
   const router = useRouter();
   const { habitConfigs, setHabitConfig } = useOnboardingStore();
   
-  const config = habitConfigs["smoking"] || { cigarettesPerDay: 10, costPerCigarette: 18 };
+  const defaultConfig = { cigarettesPerDay: 10, costPerCigarette: 18 };
+  const config = { ...defaultConfig, ...(habitConfigs["smoking"] || {}) };
 
   const weeklySpend = (config.cigarettesPerDay || 0) * (config.costPerCigarette || 0) * 7;
 

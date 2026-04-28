@@ -24,39 +24,24 @@ interface DashboardContentProps {
 export default function DashboardContent({ initialData }: DashboardContentProps) {
   const [isSlipOpen, setIsSlipOpen] = useState(false);
   
-  // Default fallback data for a polished first-time view if API is not available
+  // Default fallback data for a clean first-time view
   const dashboard = initialData || {
-    habits: [{
-      userHabitId: "demo-habit",
-      habitName: "Smoking",
-      habitIcon: "🚬",
-      currentStreak: 12,
-    }],
-    totalSavedToday: 180,
-    totalSavedWeek: 1260,
-    totalSavedMonth: 5400,
-    totalSavedAllTime: 12400,
-    level: 5,
-    levelName: "Iron Will",
-    currentXp: 1450,
-    nextLevelXp: 2000,
-    withdrawalMessage: {
-      id: "demo-msg",
-      habitId: "demo-habit",
-      dayOffset: 12,
-      phase: "Stabilization",
-      message: "Your nicotine receptors are starting to downregulate. The mental fog is lifting.",
-      tone: "EMPATHETIC",
-      createdAt: new Date().toISOString()
-    },
-    dopamineSuggestions: [
-      { id: "1", title: "Quick HIIT", description: "5 minutes of jumping jacks to reset your pulse.", iconType: "exercise", activity: "Jumping Jacks", category: "Physical", durationMinutes: 5, intensity: "HIGH" },
-      { id: "2", title: "Lofi Beats", description: "Put on your headphones and focus on the bass.", iconType: "music", activity: "Listening to music", category: "Entertainment", durationMinutes: 15, intensity: "LOW" },
-      { id: "3", title: "Cold Water", description: "Splash your face with ice cold water for an instant reset.", iconType: "default", activity: "Cold splash", category: "Self-care", durationMinutes: 1, intensity: "MEDIUM" }
-    ]
+    habits: [],
+    totalSavedToday: 0,
+    totalSavedWeek: 0,
+    totalSavedMonth: 0,
+    totalSavedAllTime: 0,
+    level: 1,
+    levelName: "Novice",
+    currentXp: 0,
+    nextLevelXp: 100,
+    withdrawalMessage: null,
+    dopamineSuggestions: []
   };
 
-  const activeHabit = dashboard.habits[0];
+  const activeHabit = dashboard.habits && dashboard.habits.length > 0 
+    ? dashboard.habits[0] 
+    : null;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -69,24 +54,43 @@ export default function DashboardContent({ initialData }: DashboardContentProps)
             
             {/* Action Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <StreakCard 
-                habitName={activeHabit.habitName}
-                streakDays={activeHabit.currentStreak}
-                habitColor="amber"
-              />
-              <div className="space-y-6">
-                <CheckInButton 
-                  userHabitId={activeHabit.userHabitId}
-                  habitName={activeHabit.habitName}
-                  currentStreak={activeHabit.currentStreak}
-                  onSlip={() => setIsSlipOpen(true)}
-                />
-                <WithdrawalMessage message={dashboard.withdrawalMessage} />
-              </div>
+              {activeHabit ? (
+                <>
+                  <StreakCard 
+                    habitName={activeHabit.habitName}
+                    streakDays={activeHabit.currentStreak}
+                    habitColor="amber"
+                  />
+                  <div className="space-y-6">
+                    <CheckInButton 
+                      userHabitId={activeHabit.userHabitId}
+                      habitName={activeHabit.habitName}
+                      currentStreak={activeHabit.currentStreak}
+                      onSlip={() => setIsSlipOpen(true)}
+                    />
+                    {dashboard.todayMessage && (
+                      <WithdrawalMessage message={dashboard.todayMessage} />
+                    )}
+                  </div>
+                </>
+              ) : (
+                <Card className="col-span-2 p-12 bg-white/5 border-dashed border-white/10 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6 border border-amber-500/20">
+                    <ShieldCheck className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Habits Tracked</h3>
+                  <p className="text-slate-400 mb-6 max-w-md">
+                    Finish your onboarding to start tracking your progress and saving money.
+                  </p>
+                  <Button onClick={() => router.push("/onboarding")} className="bg-amber-500 text-black hover:bg-amber-600 font-bold">
+                    Complete Onboarding
+                  </Button>
+                </Card>
+              )}
             </div>
 
             {/* Progress Visualization */}
-            <HealthTimeline currentDays={activeHabit.currentStreak} />
+            {activeHabit && <HealthTimeline currentDays={activeHabit.currentStreak} />}
 
             <div className="space-y-8">
               <MoneyPanel 
@@ -153,12 +157,14 @@ export default function DashboardContent({ initialData }: DashboardContentProps)
       {/* Persistent Bottom Bar */}
       <GlobalStatsBar />
 
-      <SlipFlow 
-        isOpen={isSlipOpen}
-        onClose={() => setIsSlipOpen(false)}
-        userHabitId={activeHabit.userHabitId}
-        habitName={activeHabit.habitName}
-      />
+      {activeHabit && (
+        <SlipFlow 
+          isOpen={isSlipOpen}
+          onClose={() => setIsSlipOpen(false)}
+          userHabitId={activeHabit.userHabitId}
+          habitName={activeHabit.habitName}
+        />
+      )}
     </div>
   );
 }

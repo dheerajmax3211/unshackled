@@ -6,6 +6,7 @@ import { getMyHabits } from "@/lib/api/habits";
 import { getMyStreaks } from "@/lib/api/streaks";
 import { getNotifications } from "@/lib/api/notifications";
 import { getChallenges } from "@/lib/api/challenges";
+import { useRouter, usePathname } from "next/navigation";
 
 import { useUserStore } from "@/store/useUserStore";
 import { useHabitStore } from "@/store/useHabitStore";
@@ -20,6 +21,8 @@ import { useAuth } from "@/hooks/useAuth";
 export function StoreHydrator({ children }: { children: React.ReactNode }) {
   const { session, loading: authLoading } = useAuth();
   const hydrated = useRef(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Get store setters
   const setUser = useUserStore((state) => state.setUser);
@@ -76,6 +79,11 @@ export function StoreHydrator({ children }: { children: React.ReactNode }) {
         setStreaks(streaks);
         setNotifications(notifications);
         setChallenges(challenges);
+
+        // Redirect if onboarding is not complete
+        if (!user.onboardingCompleted && !pathname.startsWith("/onboarding")) {
+          router.push("/onboarding");
+        }
 
         hydrated.current = true;
       } catch (error) {

@@ -83,16 +83,19 @@ public class UserRepository {
     public void insert(UserModel user) {
         String sql = """
             INSERT INTO users (
-                id, username, display_name, country, currency, is_supporter
-            ) VALUES (?, ?, ?, ?, ?, ?)
+                id, username, display_name, avatar_url, bio, country, currency, is_supporter, leaderboard_opt_in
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
         jdbcTemplate.update(sql,
                 user.id(),
                 user.username(),
                 user.displayName(),
+                user.avatarUrl(),
+                user.bio(),
                 user.country(),
                 user.currency(),
-                user.isSupporter()
+                user.isSupporter(),
+                user.leaderboardOptIn()
         );
     }
 
@@ -124,6 +127,14 @@ public class UserRepository {
         if (request.leaderboardOptIn() != null) {
             sql.append(", leaderboard_opt_in = ?");
             params.add(request.leaderboardOptIn());
+        }
+        if (request.country() != null) {
+            sql.append(", country = ?");
+            params.add(request.country());
+        }
+        if (request.currency() != null) {
+            sql.append(", currency = ?");
+            params.add(request.currency());
         }
 
         sql.append(" WHERE id = ?");

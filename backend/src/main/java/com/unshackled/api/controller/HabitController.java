@@ -1,9 +1,13 @@
 package com.unshackled.api.controller;
 
 import com.unshackled.api.dto.AddHabitRequest;
+import com.unshackled.api.dto.UpdateHabitRequest;
+import com.unshackled.api.dto.CheckInRequest;
+import com.unshackled.api.dto.CheckInResponse;
 import com.unshackled.api.model.HabitModel;
 import com.unshackled.api.model.UserHabitModel;
 import com.unshackled.api.security.AuthenticatedUser;
+import com.unshackled.api.service.CheckInService;
 import com.unshackled.api.service.HabitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +26,7 @@ import java.util.UUID;
 public class HabitController {
 
     private final HabitService habitService;
+    private final CheckInService checkInService;
 
     /**
      * Get all pre-defined habits (Smoking, Drinking, etc.).
@@ -70,7 +75,7 @@ public class HabitController {
     @PutMapping("/mine/{userHabitId}")
     public UserHabitModel updateHabitConfig(
             @PathVariable UUID userHabitId,
-            @Valid @RequestBody AddHabitRequest request
+            @Valid @RequestBody UpdateHabitRequest request
     ) {
         String authUserId = AuthenticatedUser.requireCurrentUserId();
         return habitService.updateHabitConfig(authUserId, authUserId, userHabitId, request);
@@ -80,9 +85,24 @@ public class HabitController {
      * Stop tracking a habit (soft delete / deactivate).
      */
     @DeleteMapping("/mine/{userHabitId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivateHabit(@PathVariable UUID userHabitId) {
+    public org.springframework.http.ResponseEntity<java.util.Map<String, String>> deactivateHabit(@PathVariable UUID userHabitId) {
         String authUserId = AuthenticatedUser.requireCurrentUserId();
-        habitService.deactivateHabit(authUserId, authUserId, userHabitId);
+        UserHabitModel habit = habitService.deactivateHabit(authUserId, authUserId, userHabitId);
+        
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+            "message", "Habit with ID " + userHabitId + " has been successfully deactivated.",
+            "status", "success"
+        ));
+    }
+
+    /**
+     * Submit a daily check-in for a specific habit.
+     * This endpoint is called by the frontend dashboard.
+     */
+    @PostMapping("/check-in")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CheckInResponse submitCheckIn(@Valid @RequestBody CheckInRequest request) {
+        String authUserId = AuthenticatedUser.requireCurrentUserId();
+        return checkInService.submitCheckIn(authUserId, request);
     }
 }

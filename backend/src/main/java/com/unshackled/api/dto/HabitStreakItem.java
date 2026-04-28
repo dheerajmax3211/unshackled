@@ -6,5 +6,6 @@ public record HabitStreakItem(
     UUID userHabitId,
     String habitName,
     String habitIcon,
-    int currentStreak
+    int currentStreak,
+    boolean isActive
 ) {}

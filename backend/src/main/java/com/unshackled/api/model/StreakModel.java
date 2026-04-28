@@ -5,16 +5,17 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
- * Represents a row in the `streaks` database table.
- * Core game mechanic updated upon each check-in.
+ * Represents a streak record for a specific user habit.
+ * Includes isActive status from the parent habit record.
  */
 public record StreakModel(
         UUID id,
         UUID userHabitId,
-        Integer currentStreak,
-        Integer longestStreak,
+        int currentStreak,
+        int longestStreak,
         LocalDate lastCheckinDate,
-        Integer totalCleanDays,
+        int totalCleanDays,
+        Boolean isActive, // Joined from user_habits
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
 ) {}

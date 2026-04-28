@@ -41,8 +41,8 @@ public class UserService {
                 id,
                 request.username(),
                 request.displayName(),
-                null, // avatarUrl
-                null, // bio
+                request.avatarUrl(),
+                request.bio(),
                 request.country() != null ? request.country() : "IN",
                 request.currency() != null ? request.currency() : "INR",
                 request.isSupporter() != null ? request.isSupporter() : false,
@@ -53,7 +53,7 @@ public class UserService {
                 null, // dailyReminderTime
                 "free", // premiumStatus
                 null, // stripeCustomerId
-                true, // leaderboardOptIn
+                request.leaderboardOptIn() != null ? request.leaderboardOptIn() : true,
                 null, // createdAt (DB handles this)
                 null  // updatedAt (DB handles this)
         );
@@ -95,21 +95,25 @@ public class UserService {
         return getUserById(authUserId);
     }
 
-    public void deleteUser(String authUserId, String targetUserId) {
+    public UserModel deleteUser(String authUserId, String targetUserId) {
         if (!authUserId.equals(targetUserId)) {
             throw new ForbiddenException("You can only delete your own profile");
         }
 
         UUID id = UUID.fromString(authUserId);
 
-        // Ensure user exists
-        userRepository.findById(id)
+        // Ensure user exists and get details
+        UserModel user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         userRepository.deleteById(id);
-        log.info("Deleted user profile for ID: {}", id);
+        log.info("Deleted user profile for ID: {} (@{})", id, user.username());
         
-        // Note: Full GDPR deletion involves Auth0/Supabase Admin API call as well,
-        // to delete the auth.users record. That will be implemented in future steps.
+        return user;
+    }
+
+    public void updatePremiumStatus(String userId, String status) {
+        userRepository.updatePremiumStatus(UUID.fromString(userId), status);
+        log.info("Debug: Updated premium status to {} for user {}", status, userId);
     }
 }

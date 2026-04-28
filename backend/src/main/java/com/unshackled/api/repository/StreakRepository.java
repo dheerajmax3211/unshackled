@@ -29,12 +29,18 @@ public class StreakRepository {
             rs.getInt("longest_streak"),
             rs.getDate("last_checkin_date") != null ? rs.getDate("last_checkin_date").toLocalDate() : null,
             rs.getInt("total_clean_days"),
+            rs.getBoolean("is_active"),
             rs.getObject("created_at", OffsetDateTime.class),
             rs.getObject("updated_at", OffsetDateTime.class)
     );
 
     public Optional<StreakModel> findByUserHabitId(UUID userHabitId) {
-        String sql = "SELECT * FROM streaks WHERE user_habit_id = ?";
+        String sql = """
+            SELECT s.*, uh.is_active 
+            FROM streaks s
+            JOIN user_habits uh ON s.user_habit_id = uh.id
+            WHERE s.user_habit_id = ?
+        """;
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, userHabitId));
         } catch (EmptyResultDataAccessException e) {
@@ -66,7 +72,7 @@ public class StreakRepository {
 
         // Convert List<UUID> to Postgres UUID[]
         String sql = """
-            SELECT s.* FROM streaks s
+            SELECT s.*, uh.is_active FROM streaks s
             JOIN user_habits uh ON s.user_habit_id = uh.id
             WHERE uh.user_id = ANY(?)
             ORDER BY s.current_streak DESC

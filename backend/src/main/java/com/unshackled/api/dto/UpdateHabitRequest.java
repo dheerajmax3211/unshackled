@@ -1,19 +1,14 @@
 package com.unshackled.api.dto;
 
-import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 /**
- * Request DTO for adding a new habit to a user's tracking list.
+ * Request DTO for updating an existing tracked habit.
+ * All fields are optional to support partial updates.
  */
-public record AddHabitRequest(
-        @NotNull(message = "Habit ID is required")
-        String habitId,
-        
-        @NotNull(message = "Quit date is required")
+public record UpdateHabitRequest(
         LocalDate quitDate,
         
         // Smoking
@@ -38,5 +33,7 @@ public record AddHabitRequest(
         // Custom
         String customDescription,
         BigDecimal customTimePerDay,
-        BigDecimal customSpendPerDay
+        BigDecimal customSpendPerDay,
+        
+        Boolean isActive
 ) {}

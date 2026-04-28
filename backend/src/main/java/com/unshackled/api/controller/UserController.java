@@ -54,10 +54,14 @@ public class UserController {
      * Triggers a GDPR cascade delete (partially implemented).
      */
     @DeleteMapping("/me")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCurrentUser() {
+    public org.springframework.http.ResponseEntity<java.util.Map<String, String>> deleteCurrentUser() {
         String authUserId = AuthenticatedUser.requireCurrentUserId();
-        userService.deleteUser(authUserId, authUserId);
+        com.unshackled.api.model.UserModel user = userService.deleteUser(authUserId, authUserId);
+        
+        return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
+            "message", "User @" + user.username() + " (ID: " + user.id() + ") has been successfully deleted.",
+            "status", "success"
+        ));
     }
 
     /**

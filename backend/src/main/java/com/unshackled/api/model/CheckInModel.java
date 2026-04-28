@@ -13,6 +13,8 @@ public record CheckInModel(
         UUID userHabitId,
         LocalDate checkinDate,
         String status, // 'clean' or 'slipped'
+        String mood,
+        String slipReason,
         String note,
         OffsetDateTime createdAt
 ) {}

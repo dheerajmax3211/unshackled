@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface HabitConfig {
   habitId: string;
@@ -41,7 +42,9 @@ interface OnboardingState {
  * Transient store for the onboarding flow.
  * Holds multi-step form data before it is submitted to the backend.
  */
-export const useOnboardingStore = create<OnboardingState>((set) => ({
+export const useOnboardingStore = create<OnboardingState>()(
+  persist(
+    (set) => ({
   step: 1,
   username: "",
   displayName: "",
@@ -74,11 +77,16 @@ export const useOnboardingStore = create<OnboardingState>((set) => ({
 
   setStep: (step) => set({ step }),
 
-  reset: () =>
-    set({
-      step: 1,
-      selectedHabitIds: [],
-      habitConfigs: {},
-      isSupporter: false,
+      reset: () =>
+        set({
+          step: 1,
+          selectedHabitIds: [],
+          habitConfigs: {},
+          isSupporter: false,
+        }),
     }),
-}));
+    {
+      name: "unshackled-onboarding-storage",
+    }
+  )
+);

@@ -20,14 +20,15 @@ public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
 
-    @GetMapping("/dashboard")
-    public ResponseEntity<DashboardSummary> getDashboard(@AuthenticationPrincipal String userId) {
-        return ResponseEntity.ok(analyticsService.getDashboardSummary(userId));
-    }
 
     @GetMapping("/money/{userHabitId}")
     public ResponseEntity<MoneySavedBreakdown> getMoneySaved(@PathVariable UUID userHabitId) {
         return ResponseEntity.ok(analyticsService.getMoneySaved(userHabitId));
+    }
+
+    @GetMapping("/money/{userHabitId}/series")
+    public ResponseEntity<java.util.Map<String, List<java.util.Map<String, Object>>>> getMoneyTimeSeries(@PathVariable UUID userHabitId) {
+        return ResponseEntity.ok(analyticsService.getMoneyTimeSeries(userHabitId));
     }
 
     @GetMapping("/heatmap/{userHabitId}")

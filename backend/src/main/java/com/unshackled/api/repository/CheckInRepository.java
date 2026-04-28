@@ -27,20 +27,24 @@ public class CheckInRepository {
             rs.getObject("user_habit_id", UUID.class),
             rs.getDate("checkin_date").toLocalDate(),
             rs.getString("status"),
+            rs.getString("mood"),
+            rs.getString("slip_reason"),
             rs.getString("note"),
             rs.getObject("created_at", OffsetDateTime.class)
     );
 
     public UUID insert(CheckInModel model) {
         String sql = """
-            INSERT INTO check_ins (user_habit_id, checkin_date, status, note)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO check_ins (user_habit_id, checkin_date, status, mood, slip_reason, note)
+            VALUES (?, ?, ?, ?, ?, ?)
             RETURNING id
         """;
         return jdbcTemplate.queryForObject(sql, UUID.class,
                 model.userHabitId(),
                 model.checkinDate(),
                 model.status(),
+                model.mood(),
+                model.slipReason(),
                 model.note()
         );
     }
@@ -71,6 +75,12 @@ public class CheckInRepository {
         return count != null ? count : 0;
     }
 
+    public int countCleanDaysBetween(UUID userHabitId, LocalDate startDate, LocalDate endDate) {
+        String sql = "SELECT COUNT(1) FROM check_ins WHERE user_habit_id = ? AND checkin_date BETWEEN ? AND ? AND status = 'clean'";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userHabitId, startDate, endDate);
+        return count != null ? count : 0;
+    }
+
     public List<CheckInModel> findByUserHabitIdAndDateRange(UUID userHabitId, LocalDate startDate, LocalDate endDate) {
         String sql = "SELECT * FROM check_ins WHERE user_habit_id = ? AND checkin_date BETWEEN ? AND ? ORDER BY checkin_date ASC";
         return jdbcTemplate.query(sql, rowMapper, userHabitId, startDate, endDate);
@@ -80,6 +90,11 @@ public class CheckInRepository {
         String sql = "SELECT COUNT(1) FROM check_ins WHERE user_habit_id = ? AND checkin_date >= ? AND status = 'slipped'";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, userHabitId, date);
         return count != null && count > 0;
+    }
+
+    public void updateStatus(UUID id, String status, String mood, String slipReason, String note) {
+        String sql = "UPDATE check_ins SET status = ?, mood = ?, slip_reason = ?, note = ? WHERE id = ?";
+        jdbcTemplate.update(sql, status, mood, slipReason, note, id);
     }
 
     public List<CheckInWithUser> findSlipsForFollowUp() {

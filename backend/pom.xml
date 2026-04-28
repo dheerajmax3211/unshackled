@@ -75,6 +75,13 @@
             <version>4.4.0</version>
         </dependency>
 
+        <!-- JWKS RSA for verifying asymmetric JWTs (ES256/RS256) -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>jwks-rsa</artifactId>
+            <version>0.22.1</version>
+        </dependency>
+
         <!-- Stripe -->
         <dependency>
             <groupId>com.stripe</groupId>

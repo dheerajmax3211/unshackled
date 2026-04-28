@@ -23,5 +23,12 @@ public record CreateUserRequest(
         @Size(max = 3, message = "Currency code must be exactly 3 characters")
         String currency,
 
-        Boolean isSupporter
+        Boolean isSupporter,
+
+        @Size(max = 255, message = "Bio cannot exceed 255 characters")
+        String bio,
+
+        String avatarUrl,
+
+        Boolean leaderboardOptIn
 ) {}

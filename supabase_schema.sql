@@ -1,4 +1,4 @@
-﻿
+
 ### 3.1 `users`
 
 ```sql
@@ -27,14 +27,7 @@ CREATE TABLE users (
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own profile" ON users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
-CREATE POLICY "Friends can read profiles" ON users FOR SELECT USING (
-  EXISTS (
-    SELECT 1 FROM friends
-    WHERE status = 'accepted'
-    AND ((requester_id = auth.uid() AND addressee_id = users.id)
-         OR (addressee_id = auth.uid() AND requester_id = users.id))
-  )
-);
+
 ```
 
 ---
@@ -301,6 +294,15 @@ CREATE POLICY "Users can insert friend requests" ON friends FOR INSERT
   WITH CHECK (auth.uid() = requester_id);
 CREATE POLICY "Addressee can update status" ON friends FOR UPDATE
   USING (auth.uid() = addressee_id OR auth.uid() = requester_id);
+
+CREATE POLICY "Friends can read profiles" ON users FOR SELECT USING (
+  EXISTS (
+    SELECT 1 FROM friends
+    WHERE status = 'accepted'
+    AND ((requester_id = auth.uid() AND addressee_id = users.id)
+         OR (addressee_id = auth.uid() AND requester_id = users.id))
+  )
+);
 ```
 
 ---
@@ -618,3 +620,72 @@ CREATE POLICY "Users manage own push subs" ON push_subscriptions
 ```
 
 ---
+
+---
+
+
+---
+
+### 4. Ultimate Content Seeds
+
+```sql
+-- 4.1 Dopamine Suggestions (Curated by Category)
+DELETE FROM dopamine_suggestions;
+INSERT INTO dopamine_suggestions (suggestion, category, habit_slugs, difficulty) VALUES
+  ('Take a 5-minute ice-cold shower to trigger a massive natural dopamine spike.', 'physical', '{smoking,drinking,pornography,gambling}', 'hard'),
+  ('Go for a 15-minute run. The "runner''s high" is a real biochemical reset.', 'physical', '{smoking,vaping,sugar_junk_food}', 'medium'),
+  ('Practice 4-7-8 breathing: In for 4, hold for 7, exhale for 8. Repeat 4 times.', 'mindfulness', '{smoking,vaping,social_media}', 'easy'),
+  ('Call a person you haven''t spoken to in a month just to say hi.', 'social', '{social_media,pornography}', 'medium'),
+  ('Eat a small piece of 85%+ dark chocolate. It triggers endorphins without the sugar crash.', 'physical', '{sugar_junk_food,drinking}', 'easy'),
+  ('Do a "Digital Sunset": Turn off all screens and read a physical book for 20 mins.', 'mindfulness', '{social_media,pornography}', 'medium'),
+  ('Clean your immediate workspace. A clean environment reduces cortisol and anxiety.', 'creative', '{gambling,social_media}', 'easy'),
+  ('Listen to one high-energy song and dance like nobody is watching.', 'creative', '{drinking,smoking}', 'easy'),
+  ('Learn 5 new words in a foreign language.', 'creative', '{social_media}', 'easy'),
+  ('Solve a challenging Sudoku or crossword puzzle.', 'creative', '{gambling,pornography}', 'medium');
+
+-- 4.2 Withdrawal Messages & Health Milestones (Habit-Specific)
+-- We use a script to match slugs to IDs dynamically
+DO $$
+DECLARE
+    smoking_id UUID := (SELECT id FROM habits WHERE slug = 'smoking');
+    drinking_id UUID := (SELECT id FROM habits WHERE slug = 'drinking');
+    vaping_id UUID := (SELECT id FROM habits WHERE slug = 'vaping');
+    social_id UUID := (SELECT id FROM habits WHERE slug = 'social_media');
+    porn_id UUID := (SELECT id FROM habits WHERE slug = 'pornography');
+    sugar_id UUID := (SELECT id FROM habits WHERE slug = 'sugar_junk_food');
+    gambling_id UUID := (SELECT id FROM habits WHERE slug = 'gambling');
+BEGIN
+    -- SMOKING
+    INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
+        (smoking_id, 0, 'Your lungs are already starting to clear. The carbon monoxide in your blood is dropping.'),
+        (smoking_id, 3, 'Peak Nicotine Withdrawal. Your brain is begging for a fix—don''t give in. It lasts only 3-5 minutes.'),
+        (smoking_id, 7, 'Your sense of taste and smell are returning. Food will taste incredible today.'),
+        (smoking_id, 14, 'Cilia in your lungs are growing back. If you are coughing, it is a sign of healing.'),
+        (smoking_id, 30, 'Your lung capacity has increased by up to 30%. Breathe deep, you earned it.');
+
+    INSERT INTO health_milestones (habit_id, day_offset, title, description) VALUES
+        (smoking_id, 1, 'CO Levels Normal', 'Carbon monoxide levels in your blood have dropped to normal.'),
+        (smoking_id, 2, 'Nerve Endings Regrow', 'Your ability to smell and taste is enhanced as nerve endings start to regrow.'),
+        (smoking_id, 90, 'Circulation Improved', 'Walking becomes easier and your lung function increases significantly.');
+
+    -- DRINKING
+    INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
+        (drinking_id, 0, 'Your liver is beginning to process out the toxins. Stay hydrated with water and electrolytes.'),
+        (drinking_id, 3, 'Anxiety might be high today as your GABA receptors adjust. This is temporary.'),
+        (drinking_id, 7, 'Your REM sleep is stabilizing. You''ll wake up feeling truly rested for the first time.'),
+        (drinking_id, 30, 'Liver fat has reduced by up to 15%. Your skin looks clearer and your eyes brighter.');
+
+    -- SOCIAL MEDIA / PORNOGRAPHY (Dopamine focused)
+    INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
+        (social_id, 1, 'Silence is loud right now. Your brain is looking for a notification "hit". Stay strong.'),
+        (social_id, 7, 'Your attention span is expanding. Try reading a long article or book today.'),
+        (porn_id, 14, 'The "fog" is lifting. You are starting to see the world with more clarity and real emotion.'),
+        (porn_id, 90, 'Reboot Complete. Your dopamine receptors are nearing baseline. Real life feels vibrant again.');
+
+    -- SUGAR
+    INSERT INTO withdrawal_messages (habit_id, day_offset, message) VALUES
+        (sugar_id, 3, 'The "Sugar Flu". You might feel tired or headachy. Your body is switching to fat-burning mode.'),
+        (sugar_id, 10, 'Cravings are subsiding. You no longer need a sweet treat to feel normal.');
+
+END $$;
+```

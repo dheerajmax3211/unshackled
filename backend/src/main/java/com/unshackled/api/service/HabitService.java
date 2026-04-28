@@ -1,6 +1,7 @@
 package com.unshackled.api.service;
 
 import com.unshackled.api.dto.AddHabitRequest;
+import com.unshackled.api.dto.UpdateHabitRequest;
 import com.unshackled.api.exception.ForbiddenException;
 import com.unshackled.api.exception.ResourceNotFoundException;
 import com.unshackled.api.exception.ValidationException;
@@ -56,12 +57,11 @@ public class HabitService {
             }
         }
 
-        // Ensure habit exists
-        habitRepository.findById(request.habitId())
-                .orElseThrow(() -> new ResourceNotFoundException("Habit", "id", request.habitId()));
+        // Resolve habit ID (could be UUID or slug)
+        UUID habitId = resolveHabitId(request.habitId());
 
         // Check if user already tracks this habit actively
-        userHabitRepository.findByUserIdAndHabitId(uId, request.habitId())
+        userHabitRepository.findByUserIdAndHabitId(uId, habitId)
                 .ifPresent(h -> {
                     if (h.isActive()) {
                         throw new com.unshackled.api.exception.ValidationException("User is already actively tracking this habit");
@@ -71,7 +71,7 @@ public class HabitService {
         UserHabitModel newModel = new UserHabitModel(
                 null,
                 uId,
-                request.habitId(),
+                habitId,
                 request.quitDate(),
                 true,
                 request.cigarettesPerDay(),
@@ -90,7 +90,7 @@ public class HabitService {
         );
 
         UUID userHabitId = userHabitRepository.insert(newModel);
-        log.info("Added habit {} for user {}", request.habitId(), uId);
+        log.info("Added habit {} for user {}", habitId, uId);
 
         // Task B-6.6 requirement: Create initial streak record
         String streakSql = """
@@ -104,7 +104,7 @@ public class HabitService {
     }
 
     @Transactional
-    public UserHabitModel updateHabitConfig(String authUserId, String targetUserId, UUID userHabitId, AddHabitRequest request) {
+    public UserHabitModel updateHabitConfig(String authUserId, String targetUserId, UUID userHabitId, UpdateHabitRequest request) {
         if (!authUserId.equals(targetUserId)) {
             throw new ForbiddenException("Cannot update habit for another user");
         }
@@ -123,7 +123,7 @@ public class HabitService {
     }
 
     @Transactional
-    public void deactivateHabit(String authUserId, String targetUserId, UUID userHabitId) {
+    public UserHabitModel deactivateHabit(String authUserId, String targetUserId, UUID userHabitId) {
         if (!authUserId.equals(targetUserId)) {
             throw new ForbiddenException("Cannot deactivate habit for another user");
         }
@@ -137,5 +137,23 @@ public class HabitService {
 
         userHabitRepository.deactivate(userHabitId);
         log.info("Deactivated userHabitId {}", userHabitId);
+        
+        return existing;
+    }
+
+    private UUID resolveHabitId(String habitIdStr) {
+        try {
+            // First try as UUID
+            UUID id = UUID.fromString(habitIdStr);
+            // Verify it exists in catalog
+            return habitRepository.findById(id)
+                    .map(HabitModel::id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Habit", "id", id));
+        } catch (IllegalArgumentException e) {
+            // Not a UUID, try as slug
+            return habitRepository.findBySlug(habitIdStr)
+                    .map(HabitModel::id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Habit", "slug", habitIdStr));
+        }
     }
 }

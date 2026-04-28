@@ -58,8 +58,29 @@ public class XpService {
         log.info("Awarded {} XP to user {} for {}", amount, userId, eventType);
     }
 
+    @Transactional
+    public void deductXp(String userId, String eventType, int amount, UUID referenceId, String description) {
+        if (amount <= 0) return;
+
+        UUID uId = UUID.fromString(userId);
+
+        XpEventModel event = new XpEventModel(
+                null,
+                uId,
+                eventType,
+                -amount,
+                referenceId,
+                description,
+                null
+        );
+
+        xpEventRepository.insert(event);
+        log.info("Deducted {} XP from user {} for {}", amount, userId, eventType);
+    }
+
     public int getTotalXp(String userId) {
-        return xpEventRepository.sumByUserId(UUID.fromString(userId));
+        int totalXp = xpEventRepository.sumByUserId(UUID.fromString(userId));
+        return Math.max(0, totalXp);
     }
 
     public LevelDefinition.Level getUserLevel(String userId) {

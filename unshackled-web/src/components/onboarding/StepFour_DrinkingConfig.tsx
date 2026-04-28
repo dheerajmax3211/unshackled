@@ -13,7 +13,8 @@ export default function StepFour_DrinkingConfig() {
   const router = useRouter();
   const { habitConfigs, setHabitConfig } = useOnboardingStore();
   
-  const config = habitConfigs["drinking"] || { drinksPerWeek: 5, costPerSession: 800 };
+  const defaultConfig = { drinksPerWeek: 5, costPerSession: 800 };
+  const config = { ...defaultConfig, ...(habitConfigs["drinking"] || {}) };
 
   const weeklySpend = (config.drinksPerWeek || 0) * (config.costPerSession || 0);
 

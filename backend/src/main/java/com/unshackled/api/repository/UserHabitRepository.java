@@ -1,6 +1,7 @@
 package com.unshackled.api.repository;
 
 import com.unshackled.api.dto.AddHabitRequest;
+import com.unshackled.api.dto.UpdateHabitRequest;
 import com.unshackled.api.model.UserHabitModel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -104,10 +105,14 @@ public class UserHabitRepository {
         );
     }
 
-    public void update(UUID id, AddHabitRequest request) {
-        StringBuilder sql = new StringBuilder("UPDATE user_habits SET updated_at = NOW(), quit_date = ?");
+    public void update(UUID id, UpdateHabitRequest request) {
+        StringBuilder sql = new StringBuilder("UPDATE user_habits SET updated_at = NOW()");
         List<Object> params = new ArrayList<>();
-        params.add(request.quitDate());
+
+        if (request.quitDate() != null) {
+            sql.append(", quit_date = ?");
+            params.add(request.quitDate());
+        }
 
         if (request.cigarettesPerDay() != null) {
             sql.append(", cigarettes_per_day = ?");
@@ -156,6 +161,10 @@ public class UserHabitRepository {
         if (request.customSpendPerDay() != null) {
             sql.append(", custom_spend_per_day = ?");
             params.add(request.customSpendPerDay());
+        }
+        if (request.isActive() != null) {
+            sql.append(", is_active = ?");
+            params.add(request.isActive());
         }
 
         sql.append(" WHERE id = ?");

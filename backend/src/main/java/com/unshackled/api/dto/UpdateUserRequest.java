@@ -21,5 +21,11 @@ public record UpdateUserRequest(
 
         LocalTime dailyReminderTime,
 
-        Boolean leaderboardOptIn
+        Boolean leaderboardOptIn,
+
+        @Size(max = 2, message = "Country code must be 2 characters")
+        String country,
+
+        @Size(max = 3, message = "Currency code must be 3 characters")
+        String currency
 ) {}

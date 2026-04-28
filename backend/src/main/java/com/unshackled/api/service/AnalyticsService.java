@@ -29,9 +29,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service for computing habit analytics and financial savings.
@@ -87,13 +88,13 @@ public class AnalyticsService {
                         .map(StreakModel::currentStreak)
                         .orElse(0);
                 
-                habits.add(new HabitStreakItem(uh.id(), hModel.displayName(), hModel.icon(), currentStreak));
+                habits.add(new HabitStreakItem(uh.id(), hModel.displayName(), hModel.icon(), currentStreak, uh.isActive()));
                 habitSlugs.add(hModel.slug());
 
-                // Pick the habit with the highest streak to show specific content for
-                if (currentStreak > maxStreak) {
+                // Pick the habit with the highest streak to show specific content for (prioritizing active ones)
+                if (uh.isActive() && (primaryHabitId == null || currentStreak >= maxStreak)) {
                     maxStreak = currentStreak;
-                    primaryHabitId = uh.id();
+                    primaryHabitId = uh.habitId(); // FIXED: Use the Global Habit ID for content lookup
                 }
             }
         }
@@ -272,6 +273,53 @@ public class AnalyticsService {
         }
 
         return dailyRate.multiply(BigDecimal.valueOf(cleanDays)).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Computes time-series data for money saved (Daily, Weekly, Monthly).
+     */
+    public Map<String, List<Map<String, Object>>> getMoneyTimeSeries(UUID userHabitId) {
+        UserHabitModel userHabit = userHabitRepository.findById(userHabitId)
+                .orElseThrow(() -> new IllegalArgumentException("User habit not found"));
+        HabitModel habit = habitRepository.findById(userHabit.habitId()).orElseThrow();
+        
+        LocalDate today = LocalDate.now();
+        Map<String, List<Map<String, Object>>> series = new LinkedHashMap<>();
+
+        // 1. Last 7 Days (Daily)
+        List<Map<String, Object>> daily = new ArrayList<>();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            int clean = checkInRepository.countCleanDaysSince(userHabitId, date) - 
+                        checkInRepository.countCleanDaysSince(userHabitId, date.plusDays(1));
+            // Actually, we want cumulative or per-day? Usually charts look better cumulative.
+            // Let's provide absolute savings for that specific day.
+            int dayClean = checkInRepository.countCleanDaysBetween(userHabitId, date, date);
+            daily.add(Map.of("label", date.toString(), "value", calculateSavings(userHabit, habit.slug(), dayClean)));
+        }
+        series.put("daily", daily);
+
+        // 2. Last 4 Weeks (Weekly)
+        List<Map<String, Object>> weekly = new ArrayList<>();
+        for (int i = 3; i >= 0; i--) {
+            LocalDate start = today.minusWeeks(i).with(java.time.DayOfWeek.MONDAY);
+            LocalDate end = start.plusDays(6);
+            int weekClean = checkInRepository.countCleanDaysBetween(userHabitId, start, end);
+            weekly.add(Map.of("label", "Week " + start.toString(), "value", calculateSavings(userHabit, habit.slug(), weekClean)));
+        }
+        series.put("weekly", weekly);
+
+        // 3. Last 12 Months (Monthly)
+        List<Map<String, Object>> monthly = new ArrayList<>();
+        for (int i = 11; i >= 0; i--) {
+            LocalDate start = today.minusMonths(i).withDayOfMonth(1);
+            LocalDate end = start.plusMonths(1).minusDays(1);
+            int monthClean = checkInRepository.countCleanDaysBetween(userHabitId, start, end);
+            monthly.add(Map.of("label", start.getMonth().name() + " " + start.getYear(), "value", calculateSavings(userHabit, habit.slug(), monthClean)));
+        }
+        series.put("monthly", monthly);
+
+        return series;
     }
 
     public WeeklyReportData getWeeklyReportData(UUID userId) {

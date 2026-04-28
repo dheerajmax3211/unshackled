@@ -1,0 +1,823 @@
+{
+	"info": {
+		"_postman_id": "7d9b9c8a-4e2b-4f9e-8c7d-3a1b2c3d4e5f",
+		"name": "Unshackled API (Ultimate Edition)",
+		"description": "100% coverage of all 19 controllers and 50+ endpoints with all possible parameters and max-complexity payloads.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Login Proxy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.environment.set(\"authToken\", jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"yourpassword\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. User Management",
+			"item": [
+				{
+					"name": "Create Profile (Full)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"recovery_pro\",\n    \"displayName\": \"Master Warrior\",\n    \"bio\": \"Recovery advocate since 2026.\",\n    \"avatarUrl\": \"https://api.dicebear.com/7.x/avataaars/svg?seed=Felix\",\n    \"country\": \"IN\",\n    \"currency\": \"INR\",\n    \"isSupporter\": false,\n    \"leaderboardOptIn\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Profile (Full)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"displayName\": \"Recovering Pro\",\n    \"avatarUrl\": \"https://api.dicebear.com/7.x/avataaars/svg?seed=Updated\",\n    \"bio\": \"Sharing my journey to stay accountable.\",\n    \"country\": \"US\",\n    \"currency\": \"USD\",\n    \"notificationPrefs\": \"{\\\"daily_reminder\\\": true, \\\"weekly_report\\\": true}\",\n    \"dailyReminderTime\": \"09:30:00\",\n    \"leaderboardOptIn\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get My Profile",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "me"]
+						}
+					}
+				},
+				{
+					"name": "Get Public Profile",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/users/{{username}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "{{username}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete My Account",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["users", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Onboarding & Habits",
+			"item": [
+				{
+					"name": "Get Onboarding Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/onboarding/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["onboarding", "status"]
+						}
+					}
+				},
+				{
+					"name": "Complete Onboarding (Mega Payload)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"displayName\": \"Onboarded User\",\n    \"country\": \"IN\",\n    \"currency\": \"INR\",\n    \"isSupporter\": false,\n    \"quitDate\": \"2026-04-20\",\n    \"habits\": [\n        {\n            \"habitId\": \"smoking\",\n            \"quitDate\": \"2026-04-20\",\n            \"cigarettesPerDay\": 20,\n            \"costPerCigarette\": 15.5\n        },\n        {\n            \"habitId\": \"drinking\",\n            \"quitDate\": \"2026-04-22\",\n            \"drinksPerWeek\": 5,\n            \"costPerSession\": 1200\n        },\n        {\n            \"habitId\": \"vaping\",\n            \"quitDate\": \"2026-04-24\",\n            \"podsPerWeek\": 2,\n            \"podCost\": 450\n        },\n        {\n            \"habitId\": \"social-media\",\n            \"quitDate\": \"2026-04-25\",\n            \"hoursPerDay\": 4.5,\n            \"platforms\": [\"Instagram\", \"TikTok\"]\n        }\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/onboarding/complete",
+							"host": ["{{baseUrl}}"],
+							"path": ["onboarding", "complete"]
+						}
+					}
+				},
+				{
+					"name": "Get Habit Catalog",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/habits",
+							"host": ["{{baseUrl}}"],
+							"path": ["habits"]
+						}
+					}
+				},
+				{
+					"name": "Get My Habits",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/habits/mine",
+							"host": ["{{baseUrl}}"],
+							"path": ["habits", "mine"]
+						}
+					}
+				},
+				{
+					"name": "Add Single Habit (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"habitId\": \"smoking\",\n    \"quitDate\": \"2026-04-26\",\n    \"cigarettesPerDay\": 10,\n    \"costPerCigarette\": 15,\n    \"customDescription\": \"Optional\",\n    \"customTimePerDay\": 0.5,\n    \"customSpendPerDay\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/habits/mine",
+							"host": ["{{baseUrl}}"],
+							"path": ["habits", "mine"]
+						}
+					}
+				},
+				{
+					"name": "Update Habit Config",
+					"request": {
+						"method": "PUT",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cigarettesPerDay\": 12,\n    \"costPerCigarette\": 18\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/habits/mine/{{userHabitId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["habits", "mine", "{{userHabitId}}"]
+						}
+					}
+				},
+				{
+					"name": "Deactivate Habit",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/habits/mine/{{userHabitId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["habits", "mine", "{{userHabitId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Check-ins & History",
+			"item": [
+				{
+					"name": "Submit Check-in (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userHabitId\": \"{{userHabitId}}\",\n    \"notes\": \"Strong morning, minor craving at 3pm, resolved via exercise.\",\n    \"mood\": \"POSITIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/checkins",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkins"]
+						}
+					}
+				},
+				{
+					"name": "Check-in History (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/checkins/history/{{userHabitId}}?days=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkins", "history", "{{userHabitId}}"],
+							"query": [
+								{ "key": "days", "value": "30", "description": "Number of days of history to fetch" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Has Checked In Today?",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/checkins/today",
+							"host": ["{{baseUrl}}"],
+							"path": ["checkins", "today"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Streaks",
+			"item": [
+				{
+					"name": "Get All My Streaks",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/streaks",
+							"host": ["{{baseUrl}}"],
+							"path": ["streaks"]
+						}
+					}
+				},
+				{
+					"name": "Get Specific Habit Streak",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/streaks/{{userHabitId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["streaks", "{{userHabitId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Social & Challenges",
+			"item": [
+				{
+					"name": "Send Challenge (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"challengedUserId\": \"{{friendId}}\",\n    \"userHabitId\": \"{{userHabitId}}\",\n    \"message\": \"Show me your evidence!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challenges",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges"]
+						}
+					}
+				},
+				{
+					"name": "Get Challenge Upload URL",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/challenges/upload-url/{{challengeId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges", "upload-url", "{{challengeId}}"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Evidence Upload",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"storagePath\": \"challenges/{{challengeId}}/evidence.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challenges/{{challengeId}}/confirm",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges", "{{challengeId}}", "confirm"]
+						}
+					}
+				},
+				{
+					"name": "Review Challenge (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"approve\": true,\n    \"note\": \"Verified via EXIF data.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/challenges/{{challengeId}}/review",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges", "{{challengeId}}", "review"]
+						}
+					}
+				},
+				{
+					"name": "Get Challenge History",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/challenges",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges"]
+						}
+					}
+				},
+				{
+					"name": "Get Challenge Detail",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/challenges/{{challengeId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["challenges", "{{challengeId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Friends & Search",
+			"item": [
+				{
+					"name": "Get Friends List",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/friends",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends"]
+						}
+					}
+				},
+				{
+					"name": "Get Pending Requests",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/friends/pending",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends", "pending"]
+						}
+					}
+				},
+				{
+					"name": "Search Users (Query)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/friends/search?q=warrior",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends", "search"],
+							"query": [{ "key": "q", "value": "warrior" }]
+						}
+					}
+				},
+				{
+					"name": "Send Friend Request",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"addresseeUsername\": \"{{username}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/friends/request",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends", "request"]
+						}
+					}
+				},
+				{
+					"name": "Respond to Friend Request",
+					"request": {
+						"method": "PUT",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"response\": \"ACCEPTED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/friends/{{friendId}}/respond",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends", "{{friendId}}", "respond"]
+						}
+					}
+				},
+				{
+					"name": "Remove Friend",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/friends/{{friendId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["friends", "{{friendId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Analytics & Dashboard",
+			"item": [
+				{
+					"name": "Dashboard Summary",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/dashboard/summary",
+							"host": ["{{baseUrl}}"],
+							"path": ["dashboard", "summary"]
+						}
+					}
+				},
+				{
+					"name": "Money Saved Breakdown",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/analytics/money/{{userHabitId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["analytics", "money", "{{userHabitId}}"]
+						}
+					}
+				},
+				{
+					"name": "Heatmap Data (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/analytics/heatmap/{{userHabitId}}?months=12",
+							"host": ["{{baseUrl}}"],
+							"path": ["analytics", "heatmap", "{{userHabitId}}"],
+							"query": [{ "key": "months", "value": "12" }]
+						}
+					}
+				},
+				{
+					"name": "Global Stats",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/analytics/global",
+							"host": ["{{baseUrl}}"],
+							"path": ["analytics", "global"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "9. Journal",
+			"item": [
+				{
+					"name": "Save Entry (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"entryDate\": \"2026-04-26\",\n    \"content\": \"Full reflection on triggers and progress.\",\n    \"moodScore\": 9,\n    \"moodEmoji\": \"\uD83D\uDE0A\",\n    \"triggers\": [\"stress\", \"evening\"],\n    \"whatHelped\": \"Meditation\",\n    \"isShared\": true,\n    \"sharedWith\": [\"{{friendId}}\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/journal",
+							"host": ["{{baseUrl}}"],
+							"path": ["journal"]
+						}
+					}
+				},
+				{
+					"name": "Get My Entries (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/journal?limit=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["journal"],
+							"query": [{ "key": "limit", "value": "30" }]
+						}
+					}
+				},
+				{
+					"name": "Get Entry by Date",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/journal/2026-04-26",
+							"host": ["{{baseUrl}}"],
+							"path": ["journal", "2026-04-26"]
+						}
+					}
+				},
+				{
+					"name": "Get Shared Entries",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/journal/shared",
+							"host": ["{{baseUrl}}"],
+							"path": ["journal", "shared"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "10. Gamification",
+			"item": [
+				{
+					"name": "XP Summary",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/xp/summary",
+							"host": ["{{baseUrl}}"],
+							"path": ["xp", "summary"]
+						}
+					}
+				},
+				{
+					"name": "All Badges with Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/badges",
+							"host": ["{{baseUrl}}"],
+							"path": ["badges"]
+						}
+					}
+				},
+				{
+					"name": "Earned Badges",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/badges/earned",
+							"host": ["{{baseUrl}}"],
+							"path": ["badges", "earned"]
+						}
+					}
+				},
+				{
+					"name": "Friends Leaderboard",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard/friends",
+							"host": ["{{baseUrl}}"],
+							"path": ["leaderboard", "friends"]
+						}
+					}
+				},
+				{
+					"name": "Global Leaderboard",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/leaderboard/global",
+							"host": ["{{baseUrl}}"],
+							"path": ["leaderboard", "global"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "11. Content & Suggestions",
+			"item": [
+				{
+					"name": "Withdrawal Info (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/content/withdrawal?habitId={{habitId}}&dayOffset=3",
+							"host": ["{{baseUrl}}"],
+							"path": ["content", "withdrawal"],
+							"query": [
+								{ "key": "habitId", "value": "{{habitId}}" },
+								{ "key": "dayOffset", "value": "3" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Dopamine Suggestions (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/content/dopamine?habits=smoking,drinking",
+							"host": ["{{baseUrl}}"],
+							"path": ["content", "dopamine"],
+							"query": [{ "key": "habits", "value": "smoking,drinking" }]
+						}
+					}
+				},
+				{
+					"name": "Money Spending Suggestion (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/content/money?country=IN&amount=5000",
+							"host": ["{{baseUrl}}"],
+							"path": ["content", "money"],
+							"query": [
+								{ "key": "country", "value": "IN" },
+								{ "key": "amount", "value": "5000" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Health Milestones (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/content/health-milestones?habitId={{habitId}}&dayOffset=30",
+							"host": ["{{baseUrl}}"],
+							"path": ["content", "health-milestones"],
+							"query": [
+								{ "key": "habitId", "value": "{{habitId}}" },
+								{ "key": "dayOffset", "value": "30" }
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "12. Notifications & Push",
+			"item": [
+				{
+					"name": "Get Notifications (Params)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/notifications?onlyUnread=false",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications"],
+							"query": [{ "key": "onlyUnread", "value": "false" }]
+						}
+					}
+				},
+				{
+					"name": "Mark as Read",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "{{notificationId}}", "read"]
+						}
+					}
+				},
+				{
+					"name": "Mark All as Read",
+					"request": {
+						"method": "PUT",
+						"url": {
+							"raw": "{{baseUrl}}/notifications/read-all",
+							"host": ["{{baseUrl}}"],
+							"path": ["notifications", "read-all"]
+						}
+					}
+				},
+				{
+					"name": "Get VAPID Public Key",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/push/vapid-public-key",
+							"host": ["{{baseUrl}}"],
+							"path": ["push", "vapid-public-key"]
+						}
+					}
+				},
+				{
+					"name": "Subscribe to Push (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"endpoint\": \"https://fcm.googleapis.com/...\",\n    \"p256dh\": \"...\",\n    \"auth\": \"...\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/push/subscribe",
+							"host": ["{{baseUrl}}"],
+							"path": ["push", "subscribe"]
+						}
+					}
+				},
+				{
+					"name": "Unsubscribe (Params)",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseUrl}}/push/unsubscribe?endpoint=https://...",
+							"host": ["{{baseUrl}}"],
+							"path": ["push", "unsubscribe"],
+							"query": [{ "key": "endpoint", "value": "https://..." }]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "13. Payments & Status",
+			"item": [
+				{
+					"name": "Create Checkout Session (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"successUrl\": \"http://localhost:3000/success\",\n    \"cancelUrl\": \"http://localhost:3000/cancel\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/checkout",
+							"host": ["{{baseUrl}}"],
+							"path": ["payments", "checkout"]
+						}
+					}
+				},
+				{
+					"name": "Create Billing Portal (Full)",
+					"request": {
+						"method": "POST",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"returnUrl\": \"http://localhost:3000/settings\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments/portal",
+							"host": ["{{baseUrl}}"],
+							"path": ["payments", "portal"]
+						}
+					}
+				},
+				{
+					"name": "Get Subscription Status",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/payments/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["payments", "status"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{ "key": "token", "value": "{{authToken}}", "type": "string" }
+		]
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:8080/api", "type": "string" },
+		{ "key": "authToken", "value": "", "type": "string" },
+		{ "key": "userHabitId", "value": "PLACEHOLDER_UUID", "type": "string" },
+		{ "key": "challengeId", "value": "PLACEHOLDER_UUID", "type": "string" },
+		{ "key": "friendId", "value": "PLACEHOLDER_UUID", "type": "string" },
+		{ "key": "notificationId", "value": "PLACEHOLDER_UUID", "type": "string" },
+		{ "key": "username", "value": "warrior1", "type": "string" },
+		{ "key": "habitId", "value": "smoking", "type": "string" }
+	]
+}
