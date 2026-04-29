@@ -47,17 +47,22 @@ public class PaymentController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Object>> getSubscriptionStatus(
+    public ResponseEntity<Map<String, String>> getSubscriptionStatus(
             @AuthenticationPrincipal String userId) {
         
-        return subscriptionRepository.findByUserId(UUID.fromString(userId))
-                .map(sub -> ResponseEntity.ok(java.util.Map.of(
-                        "status", sub.status(),
-                        "tier", sub.tier()
-                )))
-                .orElse(ResponseEntity.ok(java.util.Map.of(
-                        "status", "inactive",
-                        "tier", "free"
-                )));
+        var subscription = subscriptionRepository.findByUserId(UUID.fromString(userId));
+        
+        if (subscription.isPresent()) {
+            var sub = subscription.get();
+            return ResponseEntity.ok(java.util.Map.of(
+                    "status", sub.status(),
+                    "tier", sub.plan()
+            ));
+        }
+
+        return ResponseEntity.ok(java.util.Map.of(
+                "status", "inactive",
+                "tier", "free"
+        ));
     }
 }
