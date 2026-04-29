@@ -28,10 +28,6 @@ export function useTheme() {
   return useContext(ThemeContext);
 }
 
-function applyTheme(t: ThemeName) {
-  document.documentElement.setAttribute("data-theme", t);
-  localStorage.setItem("unshackled-theme", t);
-}
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<ThemeName>("amber");
@@ -40,12 +36,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const stored = localStorage.getItem("unshackled-theme") as ThemeName | null;
     const valid = stored && themes.some((t) => t.name === stored) ? stored : "amber";
     setThemeState(valid);
-    applyTheme(valid);
+    document.documentElement.setAttribute("data-theme", valid);
   }, []);
 
   const setTheme = useCallback((newTheme: ThemeName) => {
     setThemeState(newTheme);
-    applyTheme(newTheme);
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("unshackled-theme", newTheme);
   }, []);
 
   const cycleTheme = useCallback(() => {
@@ -60,3 +57,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     </ThemeContext.Provider>
   );
 }
+
