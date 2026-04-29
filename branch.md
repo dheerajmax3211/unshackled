@@ -16,17 +16,25 @@ This document explains the purpose and content of the various branches in the Qu
   - Environment configuration (`backend/.env`).
 - **Note**: This branch contains **no frontend code**. It is intended for backend stability and as a reference for UI rewrites.
 
+### `mvp-v1-unstable` [CURRENT]
+- **Purpose**: A combined development branch containing both the stable backend and the new frontend component showcase. Use this for integration testing and full-stack development.
+- **Key Features**:
+  - Full Spring Boot backend.
+  - Full Next.js 14 frontend component showcase.
+  - Integrated environment for testing UI against live APIs.
+
 ### `frontend-stable-v1`
 - **Purpose**: A dedicated branch for the frontend UI rewrite, containing the modern Next.js 14 component showcase and design system.
 - **Key Features**:
   - Full component showcase (Landing, App, Shared, UI).
   - Mock data for visual review.
   - UI enhancement prompts and design notes.
-- **Note**: This branch is derived from `backend-stable-v1` but focuses exclusively on UI/UX development.
+- **Note**: This branch focuses exclusively on UI/UX development.
 
 ---
 
 ## Which branch should I use?
-- If you are **developing or reviewing UI/UX**, use `frontend-stable-v1`.
+- If you need to **test the UI with the backend**, use `mvp-v1-unstable`.
+- If you are **developing or reviewing UI/UX** in isolation, use `frontend-stable-v1`.
 - If you are **modifying backend logic**, use `backend-stable-v1`.
 - If you need to **reference the old UI**, switch to `feature/initial-architecture-audit`.
