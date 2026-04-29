@@ -4,181 +4,186 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
-/* ── Default Theme: Amber Fire ── */
+/* ═══════════════════════════════════════
+   CSS VARIABLE THEME SYSTEM
+   Values MUST be space-separated RGB:
+   "245 158 11" (not "#F59E0B")
+   This is required for Tailwind's
+   rgb(var(--x) / <alpha-value>) pattern.
+   ═══════════════════════════════════════ */
+
+/* ── Amber Fire (default) ── */
 :root,
 [data-theme="amber"] {
-  --brand-amber: #F59E0B;
-  --brand-amber-light: #FCD34D;
-  --brand-amber-dark: #B45309;
-  --brand-blue: #3B82F6;
-  --brand-blue-light: #93C5FD;
-  --brand-blue-dark: #1D4ED8;
-  --brand-green: #10B981;
-  --brand-green-light: #6EE7B7;
-  --brand-green-dark: #047857;
-  --brand-rose: #F43F5E;
-  --brand-rose-light: #FDA4AF;
-  --brand-rose-dark: #BE123C;
-  --surface-darkest: #020617;
-  --surface-darker: #0F172A;
-  --surface-dark: #1E293B;
-  --surface-mid: #334155;
-  --surface-light: #475569;
-  --surface-lighter: #64748B;
-  --text-primary: #F8FAFC;
-  --text-secondary: #CBD5E1;
-  --text-muted: #94A3B8;
-  --text-subtle: #64748B;
+  --brand-amber: 245 158 11;
+  --brand-amber-light: 252 211 77;
+  --brand-amber-dark: 180 83 9;
+  --brand-blue: 59 130 246;
+  --brand-blue-light: 147 197 253;
+  --brand-blue-dark: 29 78 216;
+  --brand-green: 16 185 129;
+  --brand-green-light: 110 231 183;
+  --brand-green-dark: 4 120 87;
+  --brand-rose: 244 63 94;
+  --brand-rose-light: 253 164 175;
+  --brand-rose-dark: 190 18 60;
+  --surface-darkest: 2 6 23;
+  --surface-darker: 15 23 42;
+  --surface-dark: 30 41 59;
+  --surface-mid: 51 65 85;
+  --surface-light: 71 85 105;
+  --surface-lighter: 100 116 139;
+  --text-primary: 248 250 252;
+  --text-secondary: 203 213 225;
+  --text-muted: 148 163 184;
+  --text-subtle: 100 116 139;
 }
 
-/* ── Ocean Calm ── */
 [data-theme="ocean"] {
-  --brand-amber: #0EA5E9;
-  --brand-amber-light: #38BDF8;
-  --brand-amber-dark: #0369A1;
-  --brand-blue: #14B8A6;
-  --brand-blue-light: #2DD4BF;
-  --brand-blue-dark: #0F766E;
-  --brand-green: #22D3EE;
-  --brand-green-light: #67E8F9;
-  --brand-green-dark: #0891B2;
-  --brand-rose: #FB923C;
-  --brand-rose-light: #FDBA74;
-  --brand-rose-dark: #C2410C;
-  --surface-darkest: #0A1628;
-  --surface-darker: #12243A;
-  --surface-dark: #1A3350;
-  --surface-mid: #254666;
-  --surface-light: #345D80;
-  --surface-lighter: #4A7A9E;
+  --brand-amber: 14 165 233;
+  --brand-amber-light: 56 189 248;
+  --brand-amber-dark: 3 105 161;
+  --brand-blue: 20 184 166;
+  --brand-blue-light: 45 212 191;
+  --brand-blue-dark: 15 118 110;
+  --brand-green: 34 211 238;
+  --brand-green-light: 103 232 249;
+  --brand-green-dark: 8 145 178;
+  --brand-rose: 251 146 60;
+  --brand-rose-light: 253 186 116;
+  --brand-rose-dark: 194 65 12;
+  --surface-darkest: 10 22 40;
+  --surface-darker: 18 36 58;
+  --surface-dark: 26 51 80;
+  --surface-mid: 37 70 102;
+  --surface-light: 52 93 128;
+  --surface-lighter: 74 122 158;
 }
 
-/* ── Forest Heal ── */
 [data-theme="forest"] {
-  --brand-amber: #22C55E;
-  --brand-amber-light: #4ADE80;
-  --brand-amber-dark: #15803D;
-  --brand-blue: #10B981;
-  --brand-blue-light: #34D399;
-  --brand-blue-dark: #047857;
-  --brand-green: #A3E635;
-  --brand-green-light: #BEF264;
-  --brand-green-dark: #65A30D;
-  --brand-rose: #EF4444;
-  --brand-rose-light: #F87171;
-  --brand-rose-dark: #B91C1C;
-  --surface-darkest: #0A140A;
-  --surface-darker: #142214;
-  --surface-dark: #1E321E;
-  --surface-mid: #2A462A;
-  --surface-light: #3A5E3A;
-  --surface-lighter: #4E7A4E;
+  --brand-amber: 34 197 94;
+  --brand-amber-light: 74 222 128;
+  --brand-amber-dark: 21 128 61;
+  --brand-blue: 16 185 129;
+  --brand-blue-light: 52 211 153;
+  --brand-blue-dark: 6 95 70;
+  --brand-green: 163 230 53;
+  --brand-green-light: 190 242 100;
+  --brand-green-dark: 101 163 13;
+  --brand-rose: 239 68 68;
+  --brand-rose-light: 248 113 113;
+  --brand-rose-dark: 185 28 28;
+  --surface-darkest: 10 20 10;
+  --surface-darker: 20 34 20;
+  --surface-dark: 30 50 30;
+  --surface-mid: 42 70 42;
+  --surface-light: 58 94 58;
+  --surface-lighter: 78 122 78;
 }
 
-/* ── Midnight Sky ── */
 [data-theme="midnight"] {
-  --brand-amber: #A855F7;
-  --brand-amber-light: #C084FC;
-  --brand-amber-dark: #7E22CE;
-  --brand-blue: #818CF8;
-  --brand-blue-light: #A5B4FC;
-  --brand-blue-dark: #4F46E5;
-  --brand-green: #60A5FA;
-  --brand-green-light: #93C5FD;
-  --brand-green-dark: #2563EB;
-  --brand-rose: #F472B6;
-  --brand-rose-light: #F9A8D4;
-  --brand-rose-dark: #BE185D;
-  --surface-darkest: #0A0A1A;
-  --surface-darker: #141430;
-  --surface-dark: #1E1E46;
-  --surface-mid: #2C2C5C;
-  --surface-light: #3E3E74;
-  --surface-lighter: #56568E;
+  --brand-amber: 168 85 247;
+  --brand-amber-light: 192 132 252;
+  --brand-amber-dark: 126 34 206;
+  --brand-blue: 129 140 248;
+  --brand-blue-light: 165 180 252;
+  --brand-blue-dark: 79 70 229;
+  --brand-green: 96 165 250;
+  --brand-green-light: 147 197 253;
+  --brand-green-dark: 37 99 235;
+  --brand-rose: 244 114 182;
+  --brand-rose-light: 251 182 206;
+  --brand-rose-dark: 190 24 93;
+  --surface-darkest: 10 10 26;
+  --surface-darker: 20 20 48;
+  --surface-dark: 30 30 70;
+  --surface-mid: 44 44 92;
+  --surface-light: 62 62 116;
+  --surface-lighter: 86 86 142;
+}
+
+[data-theme="dawn"] {
+  --brand-amber: 217 119 6;
+  --brand-amber-light: 245 158 11;
+  --brand-amber-dark: 146 64 14;
+  --brand-blue: 37 99 235;
+  --brand-blue-light: 96 165 250;
+  --brand-blue-dark: 29 78 216;
+  --brand-green: 5 150 105;
+  --brand-green-light: 52 211 153;
+  --brand-green-dark: 4 120 87;
+  --brand-rose: 225 29 72;
+  --brand-rose-light: 251 113 133;
+  --brand-rose-dark: 190 18 60;
+  --surface-darkest: 249 250 251;
+  --surface-darker: 243 244 246;
+  --surface-dark: 229 231 235;
+  --surface-mid: 209 213 219;
+  --surface-light: 156 163 175;
+  --surface-lighter: 107 114 128;
+  --text-primary: 17 24 39;
+  --text-secondary: 55 65 81;
+  --text-muted: 107 114 128;
+  --text-subtle: 156 163 175;
 }
 
 /* ── Base ── */
-
 @layer base {
-  *, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   body {
     font-family: "Inter", system-ui, -apple-system, sans-serif;
-    background-color: var(--surface-darkest);
-    color: var(--text-primary);
+    background-color: rgb(var(--surface-darkest));
+    color: rgb(var(--text-primary));
     overflow-x: hidden;
     transition: background-color 0.6s ease, color 0.6s ease;
   }
-
-  ::selection {
-    background-color: var(--brand-amber);
-    color: #020617;
-  }
-
+  ::selection { background-color: rgb(var(--brand-amber) / 0.3); color: rgb(var(--text-primary)); }
   ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--surface-dark); }
-  ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--surface-lighter); }
+  ::-webkit-scrollbar-track { background: rgb(var(--surface-dark)); }
+  ::-webkit-scrollbar-thumb { background: rgb(var(--surface-light)); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--surface-lighter)); }
+  [data-theme="dawn"] ::selection { color: rgb(255 255 255); }
 }
 
 /* ── Components ── */
-
 @layer components {
   .glass {
     @apply backdrop-blur-glass border;
     background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
     border-color: rgba(255,255,255,0.07);
   }
-
-  .glass-hover {
-    &:hover {
-      background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%);
-      border-color: rgba(255,255,255,0.12);
-    }
+  [data-theme="dawn"] .glass {
+    background: linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.015) 50%, rgba(0,0,0,0.025) 100%);
+    border-color: rgba(0,0,0,0.08);
   }
-
+  .glass-hover { &:hover { background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%); border-color: rgba(255,255,255,0.12); } }
+  [data-theme="dawn"] .glass-hover { &:hover { background: linear-gradient(135deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.025) 50%, rgba(0,0,0,0.04) 100%); border-color: rgba(0,0,0,0.14); } }
   .glass-card {
     @apply backdrop-blur-glass border rounded-glass shadow-glass;
     background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
     border-color: rgba(255,255,255,0.07);
   }
-
+  [data-theme="dawn"] .glass-card {
+    background: linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.015) 50%, rgba(0,0,0,0.025) 100%);
+    border-color: rgba(0,0,0,0.08);
+  }
   .glass-card-sm {
     @apply backdrop-blur-glass border rounded-glass-sm shadow-glass-sm;
     background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
     border-color: rgba(255,255,255,0.07);
   }
-
-  .text-gradient-amber {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, var(--brand-amber-light), var(--brand-amber), var(--brand-amber-dark));
+  [data-theme="dawn"] .glass-card-sm {
+    background: linear-gradient(135deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.015) 50%, rgba(0,0,0,0.025) 100%);
+    border-color: rgba(0,0,0,0.08);
   }
-  .text-gradient-blue {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, var(--brand-blue-light), var(--brand-blue), var(--brand-blue-dark));
-  }
-  .text-gradient-green {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, var(--brand-green-light), var(--brand-green), var(--brand-green-dark));
-  }
-  .text-gradient-rose {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, var(--brand-rose-light), var(--brand-rose), var(--brand-rose-dark));
-  }
+  .text-gradient-amber { @apply bg-clip-text text-transparent; background-image: linear-gradient(to right, rgb(var(--brand-amber-light)), rgb(var(--brand-amber)), rgb(var(--brand-amber-dark))); }
+  .text-gradient-blue { @apply bg-clip-text text-transparent; background-image: linear-gradient(to right, rgb(var(--brand-blue-light)), rgb(var(--brand-blue)), rgb(var(--brand-blue-dark))); }
+  .text-gradient-green { @apply bg-clip-text text-transparent; background-image: linear-gradient(to right, rgb(var(--brand-green-light)), rgb(var(--brand-green)), rgb(var(--brand-green-dark))); }
+  .text-gradient-rose { @apply bg-clip-text text-transparent; background-image: linear-gradient(to right, rgb(var(--brand-rose-light)), rgb(var(--brand-rose)), rgb(var(--brand-rose-dark))); }
 }
 
 /* ── Utilities ── */
-
 @layer utilities {
   .animate-delay-100 { animation-delay: 100ms; }
   .animate-delay-200 { animation-delay: 200ms; }
