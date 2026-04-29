@@ -64,7 +64,7 @@ public class HabitService {
         userHabitRepository.findByUserIdAndHabitId(uId, habitId)
                 .ifPresent(h -> {
                     if (h.isActive()) {
-                        throw new com.unshackled.api.exception.ValidationException("User is already actively tracking this habit");
+                        throw new ValidationException("User is already actively tracking this habit");
                     }
                 });
 

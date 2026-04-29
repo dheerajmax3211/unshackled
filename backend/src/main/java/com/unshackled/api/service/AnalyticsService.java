@@ -290,8 +290,6 @@ public class AnalyticsService {
         List<Map<String, Object>> daily = new ArrayList<>();
         for (int i = 6; i >= 0; i--) {
             LocalDate date = today.minusDays(i);
-            int clean = checkInRepository.countCleanDaysSince(userHabitId, date) - 
-                        checkInRepository.countCleanDaysSince(userHabitId, date.plusDays(1));
             // Actually, we want cumulative or per-day? Usually charts look better cumulative.
             // Let's provide absolute savings for that specific day.
             int dayClean = checkInRepository.countCleanDaysBetween(userHabitId, date, date);

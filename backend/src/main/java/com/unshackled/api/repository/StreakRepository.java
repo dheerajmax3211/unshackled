@@ -78,7 +78,6 @@ public class StreakRepository {
             ORDER BY s.current_streak DESC
         """;
         
-        java.sql.Array userIdsArray = null;
         try {
             // Using Spring's connection to create array is complex, easier to use in-clause or string conversion if driver supports it.
             // But since we use JdbcTemplate, passing UUID[] natively works with modern pgjdbc.

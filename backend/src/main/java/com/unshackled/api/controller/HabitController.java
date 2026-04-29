@@ -87,7 +87,7 @@ public class HabitController {
     @DeleteMapping("/mine/{userHabitId}")
     public org.springframework.http.ResponseEntity<java.util.Map<String, String>> deactivateHabit(@PathVariable UUID userHabitId) {
         String authUserId = AuthenticatedUser.requireCurrentUserId();
-        UserHabitModel habit = habitService.deactivateHabit(authUserId, authUserId, userHabitId);
+        habitService.deactivateHabit(authUserId, authUserId, userHabitId);
         
         return org.springframework.http.ResponseEntity.ok(java.util.Map.of(
             "message", "Habit with ID " + userHabitId + " has been successfully deactivated.",

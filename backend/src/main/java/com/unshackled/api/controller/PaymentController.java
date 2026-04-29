@@ -1,7 +1,6 @@
 package com.unshackled.api.controller;
 
 import com.stripe.exception.StripeException;
-import com.unshackled.api.model.SubscriptionModel;
 import com.unshackled.api.repository.SubscriptionRepository;
 import com.unshackled.api.service.PaymentService;
 import lombok.RequiredArgsConstructor;

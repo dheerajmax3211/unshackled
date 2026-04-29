@@ -1,5 +1,6 @@
 package com.unshackled.api.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +50,7 @@ public class SupabaseStorageService {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> map = objectMapper.readValue(response.getBody(), Map.class);
+                Map<String, Object> map = objectMapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
                 return supabaseUrl + "/storage/v1" + map.get("url").toString();
             } else {
                 throw new RuntimeException("Failed to generate signed upload URL: " + response.getStatusCode());

@@ -1,6 +1,5 @@
 package com.unshackled.api.service;
 
-import com.unshackled.api.exception.ResourceNotFoundException;
 import com.unshackled.api.model.StreakModel;
 import com.unshackled.api.model.UserHabitModel;
 import com.unshackled.api.repository.StreakRepository;
@@ -10,7 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

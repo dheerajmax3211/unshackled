@@ -81,7 +81,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             } else if ("ES256".equals(alg) || "RS256".equals(alg)) {
                 if (jwkProvider == null) {
                     jwkProvider = new com.auth0.jwk.UrlJwkProvider(
-                            new java.net.URL(supabaseProperties.getUrl() + "/auth/v1/.well-known/jwks.json")
+                            java.net.URI.create(supabaseProperties.getUrl() + "/auth/v1/.well-known/jwks.json").toURL()
                     );
                 }
                 com.auth0.jwk.Jwk jwk = jwkProvider.get(decodedJWT.getKeyId());

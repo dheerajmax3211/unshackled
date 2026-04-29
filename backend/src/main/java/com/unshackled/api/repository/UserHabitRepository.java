@@ -1,6 +1,5 @@
 package com.unshackled.api.repository;
 
-import com.unshackled.api.dto.AddHabitRequest;
 import com.unshackled.api.dto.UpdateHabitRequest;
 import com.unshackled.api.model.UserHabitModel;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.sql.Array;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;

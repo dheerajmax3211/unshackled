@@ -3,7 +3,6 @@ package com.unshackled.api.dto;
 import com.unshackled.api.model.UserModel;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
