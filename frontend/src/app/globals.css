@@ -4,8 +4,103 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
 
+/* ── Default Theme: Amber Fire ── */
+:root,
+[data-theme="amber"] {
+  --brand-amber: #F59E0B;
+  --brand-amber-light: #FCD34D;
+  --brand-amber-dark: #B45309;
+  --brand-blue: #3B82F6;
+  --brand-blue-light: #93C5FD;
+  --brand-blue-dark: #1D4ED8;
+  --brand-green: #10B981;
+  --brand-green-light: #6EE7B7;
+  --brand-green-dark: #047857;
+  --brand-rose: #F43F5E;
+  --brand-rose-light: #FDA4AF;
+  --brand-rose-dark: #BE123C;
+  --surface-darkest: #020617;
+  --surface-darker: #0F172A;
+  --surface-dark: #1E293B;
+  --surface-mid: #334155;
+  --surface-light: #475569;
+  --surface-lighter: #64748B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-subtle: #64748B;
+}
+
+/* ── Ocean Calm ── */
+[data-theme="ocean"] {
+  --brand-amber: #0EA5E9;
+  --brand-amber-light: #38BDF8;
+  --brand-amber-dark: #0369A1;
+  --brand-blue: #14B8A6;
+  --brand-blue-light: #2DD4BF;
+  --brand-blue-dark: #0F766E;
+  --brand-green: #22D3EE;
+  --brand-green-light: #67E8F9;
+  --brand-green-dark: #0891B2;
+  --brand-rose: #FB923C;
+  --brand-rose-light: #FDBA74;
+  --brand-rose-dark: #C2410C;
+  --surface-darkest: #0A1628;
+  --surface-darker: #12243A;
+  --surface-dark: #1A3350;
+  --surface-mid: #254666;
+  --surface-light: #345D80;
+  --surface-lighter: #4A7A9E;
+}
+
+/* ── Forest Heal ── */
+[data-theme="forest"] {
+  --brand-amber: #22C55E;
+  --brand-amber-light: #4ADE80;
+  --brand-amber-dark: #15803D;
+  --brand-blue: #10B981;
+  --brand-blue-light: #34D399;
+  --brand-blue-dark: #047857;
+  --brand-green: #A3E635;
+  --brand-green-light: #BEF264;
+  --brand-green-dark: #65A30D;
+  --brand-rose: #EF4444;
+  --brand-rose-light: #F87171;
+  --brand-rose-dark: #B91C1C;
+  --surface-darkest: #0A140A;
+  --surface-darker: #142214;
+  --surface-dark: #1E321E;
+  --surface-mid: #2A462A;
+  --surface-light: #3A5E3A;
+  --surface-lighter: #4E7A4E;
+}
+
+/* ── Midnight Sky ── */
+[data-theme="midnight"] {
+  --brand-amber: #A855F7;
+  --brand-amber-light: #C084FC;
+  --brand-amber-dark: #7E22CE;
+  --brand-blue: #818CF8;
+  --brand-blue-light: #A5B4FC;
+  --brand-blue-dark: #4F46E5;
+  --brand-green: #60A5FA;
+  --brand-green-light: #93C5FD;
+  --brand-green-dark: #2563EB;
+  --brand-rose: #F472B6;
+  --brand-rose-light: #F9A8D4;
+  --brand-rose-dark: #BE185D;
+  --surface-darkest: #0A0A1A;
+  --surface-darker: #141430;
+  --surface-dark: #1E1E46;
+  --surface-mid: #2C2C5C;
+  --surface-light: #3E3E74;
+  --surface-lighter: #56568E;
+}
+
+/* ── Base ── */
+
 @layer base {
-  * {
+  *, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -19,85 +114,77 @@
 
   body {
     font-family: "Inter", system-ui, -apple-system, sans-serif;
-    background-color: #020617;
-    color: #f8fafc;
+    background-color: var(--surface-darkest);
+    color: var(--text-primary);
     overflow-x: hidden;
+    transition: background-color 0.6s ease, color 0.6s ease;
   }
 
   ::selection {
-    background: rgba(245, 158, 11, 0.3);
-    color: #f8fafc;
+    background-color: var(--brand-amber);
+    color: #020617;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0f172a;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #334155;
-    border-radius: 3px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #475569;
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-light); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--surface-lighter); }
 }
+
+/* ── Components ── */
 
 @layer components {
   .glass {
-    @apply bg-glass-gradient backdrop-blur-glass border border-white/[0.06];
+    @apply backdrop-blur-glass border;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
+    border-color: rgba(255,255,255,0.07);
   }
 
   .glass-hover {
-    @apply hover:bg-glass-gradient-hover hover:border-white/[0.1] hover:shadow-glass-hover;
+    &:hover {
+      background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 50%, rgba(255,255,255,0.05) 100%);
+      border-color: rgba(255,255,255,0.12);
+    }
   }
 
   .glass-card {
-    @apply bg-glass-gradient backdrop-blur-glass border border-white/[0.06] rounded-glass shadow-glass;
+    @apply backdrop-blur-glass border rounded-glass shadow-glass;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
+    border-color: rgba(255,255,255,0.07);
   }
 
   .glass-card-sm {
-    @apply bg-glass-gradient backdrop-blur-glass border border-white/[0.06] rounded-glass-sm shadow-glass-sm;
+    @apply backdrop-blur-glass border rounded-glass-sm shadow-glass-sm;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.035) 100%);
+    border-color: rgba(255,255,255,0.07);
   }
 
   .text-gradient-amber {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-amber-light via-brand-amber to-brand-amber-dark;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--brand-amber-light), var(--brand-amber), var(--brand-amber-dark));
   }
-
   .text-gradient-blue {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue-light via-brand-blue to-brand-blue-dark;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--brand-blue-light), var(--brand-blue), var(--brand-blue-dark));
   }
-
   .text-gradient-green {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-green-light via-brand-green to-brand-green-dark;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--brand-green-light), var(--brand-green), var(--brand-green-dark));
   }
-
   .text-gradient-rose {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-rose-light via-brand-rose to-brand-rose-dark;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(to right, var(--brand-rose-light), var(--brand-rose), var(--brand-rose-dark));
   }
 }
 
+/* ── Utilities ── */
+
 @layer utilities {
-  .animate-delay-100 {
-    animation-delay: 100ms;
-  }
-  .animate-delay-200 {
-    animation-delay: 200ms;
-  }
-  .animate-delay-300 {
-    animation-delay: 300ms;
-  }
-  .animate-delay-400 {
-    animation-delay: 400ms;
-  }
-  .animate-delay-500 {
-    animation-delay: 500ms;
-  }
-  .animate-delay-700 {
-    animation-delay: 700ms;
-  }
-  .animate-delay-1000 {
-    animation-delay: 1000ms;
-  }
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-400 { animation-delay: 400ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+  .animate-delay-700 { animation-delay: 700ms; }
+  .animate-delay-1000 { animation-delay: 1000ms; }
 }

@@ -25,7 +25,7 @@ export function WithdrawalCard({
   const isCurrentDay = message.dayOffset <= currentDay;
 
   return (
-    <GlassCard glow="rose" padding="lg" className={cn("relative overflow-hidden", className)}>
+    <GlassCard padding="lg" className={cn("relative overflow-hidden", className)}>
       <div className="absolute -top-16 -right-16 w-44 h-44 bg-brand-rose/5 rounded-full blur-3xl" />
       <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-brand-amber/5 rounded-full blur-2xl" />
 

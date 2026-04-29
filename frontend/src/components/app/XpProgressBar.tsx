@@ -61,7 +61,7 @@ export function XpProgressBar({
   }, [inView, percentage]);
 
   return (
-    <GlassCard glow="amber" padding="lg" className={cn(className)}>
+    <GlassCard padding="lg" className={cn(className)}>
       <div ref={ref} className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

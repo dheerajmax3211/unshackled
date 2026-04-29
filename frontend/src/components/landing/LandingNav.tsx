@@ -105,7 +105,7 @@ export default function LandingNav() {
               <div className="pt-2">
                 <button
                   onClick={() => scrollTo("#cta")}
-                  className="w-full py-3 px-4 text-body-md font-semibold text-surface-darkest bg-gradient-to-r from-brand-amber to-brand-amber-dark rounded-glass-sm shadow-glow-amber"
+                  className="w-full py-3 px-4 text-body-md font-semibold text-surface-darkest bg-gradient-to-r from-brand-amber to-brand-amber-dark rounded-glass-sm"
                 >
                   Get Started
                 </button>

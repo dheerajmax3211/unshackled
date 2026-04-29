@@ -19,7 +19,16 @@ export default function HeroSection() {
     >
       <ThreeBackground />
 
-      <div className="absolute inset-0 bg-hero-gradient pointer-events-none" />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `
+            radial-gradient(ellipse 80% 60% at 50% 40%, rgb(var(--brand-amber) / 0.08) 0%, transparent 60%),
+            radial-gradient(ellipse 60% 50% at 20% 80%, rgb(var(--brand-blue) / 0.06) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 50% at 80% 20%, rgb(var(--brand-green) / 0.04) 0%, transparent 50%)
+          `,
+        }}
+      />
 
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-surface-darkest pointer-events-none" />
 

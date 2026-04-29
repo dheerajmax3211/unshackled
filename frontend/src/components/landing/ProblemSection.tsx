@@ -69,7 +69,6 @@ export default function ProblemSection() {
           {problems.map((problem) => (
             <motion.div key={problem.title} variants={motionVariants.scaleIn}>
               <GlassCard
-                glow={problem.color}
                 padding="lg"
                 className={cn("relative overflow-hidden group", problem.borderClass)}
               >

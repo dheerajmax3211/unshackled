@@ -43,7 +43,7 @@ export function HabitSelector({
             className={cn(
               "glass-card-sm flex flex-col items-center gap-3 p-5 transition-all duration-300 relative",
               isSelected
-                ? "border-brand-amber/40 shadow-glow-amber"
+                ? "border-brand-amber/40"
                 : "hover:border-white/[0.1]"
             )}
           >

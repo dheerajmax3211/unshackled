@@ -84,7 +84,6 @@ export default function ScienceSection() {
           {pillars.map((pillar) => (
             <motion.div key={pillar.number} variants={motionVariants.scaleIn}>
               <GlassCard
-                glow={pillar.color}
                 padding="lg"
                 className={cn("relative group", borderColors[pillar.color])}
               >

@@ -26,7 +26,7 @@ export function BadgeGrid({ badges, className }: BadgeGridProps) {
   const earnedCount = badges.filter((b) => b.earned).length;
 
   return (
-    <GlassCard glow="amber" padding="lg" className={cn(className)}>
+    <GlassCard padding="lg" className={cn(className)}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-brand-amber/15 border border-brand-amber/30 flex items-center justify-center">

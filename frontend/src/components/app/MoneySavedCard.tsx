@@ -66,7 +66,7 @@ export function MoneySavedCard({
   }, [inView, activeTab]);
 
   return (
-    <GlassCard glow="blue" padding="lg" className={cn(className)}>
+    <GlassCard padding="lg" className={cn(className)}>
       <div ref={ref} className="flex flex-col gap-6">
         <div className="flex items-center gap-2">
           <div className="w-10 h-10 rounded-full bg-brand-blue/15 border border-brand-blue/30 flex items-center justify-center">

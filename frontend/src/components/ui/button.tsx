@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-brand-amber text-surface-darkest hover:bg-brand-amber-light shadow-glow-amber",
+          "bg-brand-amber text-surface-darkest hover:bg-brand-amber-light shadow-lg",
         secondary:
           "glass border-white/10 text-text-primary hover:bg-white/[0.06] hover:border-white/[0.15]",
         outline:
@@ -18,7 +18,7 @@ const buttonVariants = cva(
         danger:
           "bg-brand-rose/20 text-brand-rose-light border border-brand-rose/20 hover:bg-brand-rose/30",
         premium:
-          "bg-gradient-to-r from-brand-amber to-brand-amber-dark text-surface-darkest font-semibold shadow-glow-amber",
+          "bg-gradient-to-r from-brand-amber to-brand-amber-dark text-surface-darkest font-semibold shadow-lg",
         link: "text-brand-amber underline-offset-4 hover:underline",
       },
       size: {

@@ -68,10 +68,10 @@ const features = [
 ];
 
 const iconColors = {
-  amber: "bg-brand-amber/10 text-brand-amber-light group-hover:bg-brand-amber/20 group-hover:shadow-glow-amber",
-  blue: "bg-brand-blue/10 text-brand-blue-light group-hover:bg-brand-blue/20 group-hover:shadow-glow-blue",
-  green: "bg-brand-green/10 text-brand-green-light group-hover:bg-brand-green/20 group-hover:shadow-glow-green",
-  rose: "bg-brand-rose/10 text-brand-rose-light group-hover:bg-brand-rose/20 group-hover:shadow-glow-rose",
+  amber: "bg-brand-amber/10 text-brand-amber-light group-hover:bg-brand-amber/20",
+  blue: "bg-brand-blue/10 text-brand-blue-light group-hover:bg-brand-blue/20",
+  green: "bg-brand-green/10 text-brand-green-light group-hover:bg-brand-green/20",
+  rose: "bg-brand-rose/10 text-brand-rose-light group-hover:bg-brand-rose/20",
 };
 
 export default function FeaturesSection() {
@@ -99,7 +99,6 @@ export default function FeaturesSection() {
               custom={i}
             >
               <GlassCard
-                glow={feature.color}
                 padding="md"
                 className="group h-full"
               >

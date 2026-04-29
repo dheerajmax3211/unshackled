@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { ThemeProvider } from "@/lib/theme-context";
+import { ThemeSwitcher } from "@/components/shared/ThemeSwitcher";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -13,9 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-surface-darkest text-text-primary antialiased">
-        {children}
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="min-h-screen antialiased">
+        <ThemeProvider>
+          {children}
+          <ThemeSwitcher />
+        </ThemeProvider>
       </body>
     </html>
   );

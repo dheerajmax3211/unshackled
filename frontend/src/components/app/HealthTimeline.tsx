@@ -27,7 +27,7 @@ export function HealthTimeline({
   const nextMilestone = milestones.find((m) => m.dayOffset > currentDay);
 
   return (
-    <GlassCard glow="green" padding="lg" className={cn(className)}>
+    <GlassCard padding="lg" className={cn(className)}>
       <div className="flex flex-col gap-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-brand-green/15 border border-brand-green/30 flex items-center justify-center">

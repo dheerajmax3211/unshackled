@@ -49,7 +49,7 @@ export default function CTASection() {
               "inline-flex items-center gap-3 px-10 py-5 rounded-glass",
               "bg-gradient-to-r from-brand-amber to-brand-amber-dark",
               "text-heading-sm font-semibold text-surface-darkest",
-              "shadow-glow-amber shadow-lg",
+              "shadow-lg",
               "hover:from-brand-amber-light hover:to-brand-amber",
               "transition-all duration-300"
             )}

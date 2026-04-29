@@ -238,13 +238,13 @@ export default function PreviewPage() {
             <div>
               <h4 className="text-heading-sm text-text-secondary mb-4">GlassCard Variants</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <GlassCard padding="sm" glow="amber">
+                <GlassCard padding="sm">
                   <p className="text-body-sm text-text-secondary">Amber glow</p>
                 </GlassCard>
-                <GlassCard padding="sm" glow="blue">
+                <GlassCard padding="sm">
                   <p className="text-body-sm text-text-secondary">Blue glow</p>
                 </GlassCard>
-                <GlassCard padding="sm" glow="green">
+                <GlassCard padding="sm">
                   <p className="text-body-sm text-text-secondary">Green glow</p>
                 </GlassCard>
               </div>

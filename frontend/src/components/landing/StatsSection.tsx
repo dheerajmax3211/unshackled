@@ -66,7 +66,6 @@ export default function StatsSection() {
           {stats.map((stat) => (
             <motion.div key={stat.label} variants={motionVariants.scaleIn}>
               <GlassCard
-                glow={stat.color}
                 padding="lg"
                 className={cn("text-center", colorBorders[stat.color])}
               >

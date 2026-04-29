@@ -54,7 +54,7 @@ export default function TestimonialsSection() {
         >
           {testimonials.map((t) => (
             <motion.div key={t.name} variants={motionVariants.scaleIn}>
-              <GlassCard glow="amber" padding="lg" className="h-full flex flex-col">
+              <GlassCard padding="lg" className="h-full flex flex-col">
                 <Quote className="w-8 h-8 text-brand-amber/30 mb-4" strokeWidth={1.5} />
 
                 <p className="text-body-md text-text-secondary leading-relaxed flex-1 mb-6 italic">

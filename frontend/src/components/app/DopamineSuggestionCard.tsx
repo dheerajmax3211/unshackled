@@ -74,7 +74,6 @@ export function DopamineSuggestionCard({
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <GlassCard
-        glow={tried ? "green" : "none"}
         padding="md"
         className={cn(
           "flex flex-col gap-4 transition-all",

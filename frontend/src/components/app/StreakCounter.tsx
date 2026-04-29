@@ -40,7 +40,7 @@ export function StreakCounter({
   }, [inView, currentStreak]);
 
   return (
-    <GlassCard glow="amber" padding="lg" className={cn("relative overflow-hidden", className)}>
+    <GlassCard padding="lg" className={cn("relative overflow-hidden", className)}>
       <div className="absolute -top-20 -right-20 w-64 h-64 bg-brand-amber/5 rounded-full blur-3xl" />
       <div ref={ref} className="relative flex flex-col items-center gap-4">
         <div className="flex items-center gap-2 text-body-sm text-text-muted">

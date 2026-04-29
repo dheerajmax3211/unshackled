@@ -33,7 +33,6 @@ export function HabitCard({
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <GlassCard
-        glow={isActive ? "amber" : "none"}
         padding="md"
         onClick={onClick}
         className={cn(

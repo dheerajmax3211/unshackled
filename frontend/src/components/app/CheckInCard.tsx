@@ -51,7 +51,7 @@ export function CheckInCard({
   const canSubmit = status && mood;
 
   return (
-    <GlassCard glow={status === "slipped" ? "rose" : "amber"} padding="lg" className={cn(className)}>
+    <GlassCard padding="lg" className={cn(className)}>
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div
@@ -83,7 +83,7 @@ export function CheckInCard({
                   className={cn(
                     "flex-1 flex items-center justify-center gap-3 py-4 rounded-glass-sm border transition-all duration-300",
                     status === "clean"
-                      ? "bg-brand-green/15 border-brand-green/40 text-brand-green-light shadow-glow-green"
+                      ? "bg-brand-green/15 border-brand-green/40 text-brand-green-light"
                       : "bg-white/[0.03] border-white/[0.08] text-text-secondary hover:border-white/[0.15]"
                   )}
                 >
@@ -97,7 +97,7 @@ export function CheckInCard({
                   className={cn(
                     "flex-1 flex items-center justify-center gap-3 py-4 rounded-glass-sm border transition-all duration-300",
                     status === "slipped"
-                      ? "bg-brand-rose/15 border-brand-rose/40 text-brand-rose-light shadow-glow-rose"
+                      ? "bg-brand-rose/15 border-brand-rose/40 text-brand-rose-light"
                       : "bg-white/[0.03] border-white/[0.08] text-text-secondary hover:border-white/[0.15]"
                   )}
                 >
@@ -143,7 +143,7 @@ export function CheckInCard({
                         className={cn(
                           "flex flex-col items-center gap-1 p-3 rounded-glass-sm border transition-all duration-300 min-w-[72px]",
                           mood === option.value
-                            ? "bg-brand-amber/15 border-brand-amber/40 shadow-glow-amber"
+                            ? "bg-brand-amber/15 border-brand-amber/40"
                             : "bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12]"
                         )}
                       >
