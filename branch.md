@@ -1,9 +1,13 @@
-### `mvp-v1.1-unstable` [CURRENT]
-- **Purpose**: Enhanced combined branch featuring dynamic color themes (Amber, Ocean, Forest, Midnight) and the floating theme switcher.
+### `mvp-v1.2-unstable` [CURRENT]
+- **Purpose**: High-fidelity visual update with habit-themed 3D backgrounds and multi-theme support.
 - **Key Features**:
-  - Full Spring Boot backend.
-  - Multi-theme support in the Next.js 14 frontend.
-  - Integration testing with theme-aware components.
+  - Dynamic 3D UI background (Cigarettes, Beer, Pills, Cannabis, Silhouettes, Broken Screens).
+  - Dynamic color theme switcher (Amber, Ocean, Forest, Midnight).
+  - Combined stable backend and frontend.
+- **Note**: **Dynamic UI background but definitely not even close to production level**. This branch is for visual review and integration testing of the new theme engine.
+
+### `mvp-v1.1-unstable`
+- **Purpose**: Enhanced combined branch featuring dynamic color themes and the floating theme switcher.
 
 ### `frontend-unstable-v1.1`
 - **Purpose**: A dedicated frontend branch containing the latest UI features, including the theme engine and switcher.
@@ -19,6 +23,7 @@
 ---
 
 ## Which branch should I use?
+- If you want the **latest visual features and theme testing**, use `mvp-v1.2-unstable`.
 - If you need to **test the UI with themes and backend**, use `mvp-v1.1-unstable`.
 - If you are **developing UI/UX with themes** in isolation, use `frontend-unstable-v1.1`.
 - If you are **modifying backend logic**, use `backend-stable-v1`.
