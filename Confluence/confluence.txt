@@ -1,0 +1,2870 @@
+Unshackled
+Project Overview:
+Unshackled is a gamified, socially accountable, emotionally intelligent web platform designed
+to help people quit bad habits — smoking, drinking, vaping, pornography, social media,
+sugar/junk food, gambling, and custom habits.
+Technical Stack
+ Backend: Spring Boot 3.x (Java 21), Supabase PostgreSQL, JWT auth, JDBC
+(JdbcTemplate)
+ Frontend: Next.js 14+ (App Router), TypeScript, Tailwind CSS, Three.js, Zustand,
+shadcn/ui
+ Infrastructure: Supabase (Auth, DB, Storage, Realtime), Stripe (payments), Resend
+(email), Web Push (VAPID), Docker/Railway (backend), Vercel (frontend)
+Key Features
+ Multi-habit tracking with daily check-ins (clean/slipped) and event-sourced streak
+computation — the streak is always recalculated from raw check-in history, never just
+incremented.
+ Proof-of-life photo challenges — friends can challenge each other for real-time photo
+proof of sobriety. Photos are EXIF-timestamp-verified server-side using the metadataextractor library. The challenged user must take a live photo within a 10-minute
+window.
+ Gamification engine — 20 levels (Spark → Unshackled at 75,000 XP), 15+ badges
+(from "Day One" to "Year One Legend"), XP for check-ins, journaling, challenges, and
+streak milestones. Friend and global leaderboards.
+ Money savings calculator — computes money saved based on habit-specific configs
+(cigarettes/day × cost, drinks/week × session cost, etc.) and maps saved amounts to
+culturally resonant, country-aware suggestions like "₹3,200 saved — that's a road trip to
+Coorg."₹3,200 saved — that's a road trip to Coorg.”
+ Health recovery timeline — science-backed health milestones per habit (e.g., Day 3:
+nicotine fully out of body; Day 14: lung cilia regenerating; Day 90: dopamine receptors
+near baseline).
+ Withdrawal empathy system — preemptive, day-specific emotional support messages
+delivered before hard days strike. Day 3 for nicotine, Days 2–4 for alcohol, and so on.
+These are served proactively, not reactively.
+ Dopamine substitution suggestions — rotating suggestions for healthy reward-circuit
+stimulation (physical, social, creative, mindfulness categories).
+ Journal with mood tracking — daily entries, mood scores (1–10), trigger identification,
+"what helped" tracking, and optional sharing with friends.
+ Push notifications + email — daily reminders, weekly reports, milestone celebrations,
+challenge alerts, relapse recovery support, and friend activity nudges. All gated by peruser notification preferences.
+ Stripe payments for the "Sovereign Plan" (₹499/month premium tier) — unlocks
+unlimited habits, unlimited friends, and advanced analytics. Includes Stripe Checkout,
+Customer Portal, and webhook handling.
+ Supporter role — a dedicated path for friends/family who want to support someone's
+recovery without tracking their own habit. They get weekly summaries and can send
+encouragement and challenges.
+ Three.js emotional animations — full-screen celebration moments for onboarding
+completion, streak milestones, challenge receipt, and relapse recovery. Each animation is
+designed as a dopamine-calibrated reward.
+Design Philosophy
+Built on four pillars of behavioral science:
+
+1. The Dopamine Gap — recognizing that addictive behaviors hijack the brain's reward
+   pathway, so the app deliberately creates healthier dopamine sources (XP, streaks, badges,
+   animations).
+2. Gamification doubles abstinence — backed by a 2024 meta-analysis (RR 2.12), every
+   gamification element has documented behavioral support.
+3. Social accountability is the #1 predictor — the friend challenge system is a consentbased, opt-in trust ritual, not surveillance.
+4. Recovery has a timeline — users deserve to know exactly what's happening in their
+   body day by day.
+   A non-negotiable principle: no shame language, ever. No red Xs, no "you failed," no guilt.
+   Every slip is met with warmth, neuroscience, and a forward-looking prompt. The copy voice
+   writes like "a compassionate friend who happens to have a PhD in neuroscience."
+   Current Status
+   The backend (Spring Boot) is fully built across 20 steps covering all domains (users, habits,
+   streaks, check-ins, XP/badges, friends, challenges with EXIF verification,
+   notifications/push/email, content, analytics, journal, leaderboard, Stripe payments, and scheduled
+   jobs). The frontend (Next.js) is largely incomplete across 19 steps with a multiple remaining
+   tasks (money time-series chart, journal page, settings, reusable UI components, landing page,
+   realtime hooks, push notification setup, and deployment).
+   Deployment config (Docker, CI/CD) is deferred for production readiness.
+   As someone who is trying to quit, I am hoping this is a solution that might work.
+   Backend:
+   Auth Controller
+   Login (Supabase Proxy)
+    Definition: Authenticates the user via Supabase, returning a JWT access token and user
+   metadata.
+    UI Use Case: Used on the Login Page. The UI stores the returned access_token in
+   secure storage (like a cookie or localStorage) to authorize all subsequent API calls. It also
+   uses the user object to populate the initial app state (username, email, etc.).
+   Request URL:
+   POST: {{baseUrl}}/auth/login
+   Response
+   {
+   "access_token":
+   "eyJhbGciOiJFUzI1NiIsImtpZCI6IjFmZmY4NDFlLTgxOWMtNDhlOC1hYmUzLTNkYzc3YjEzZGUz
+   OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2hkdWlteGxqZ3Byd21hc2RrZXRsLnN1cGFi
+   YXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyNDE3MzViNS1mZTQ5LTRlOWEtYWY5ZS1iYTZmYzQyZDdkY
+   zUiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc3MTg0MTc3LCJpYXQiOjE3NzcxODA1Nz
+   csImVtYWlsIjoiMTIzNEBjb20uY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOnsicHJvdml
+   kZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6eyJlbWFp
+   bCI6IjEyMzRAY29tLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZV92ZXJpZmllZCI6Z
+   mFsc2UsInN1YiI6IjI0MTczNWI1LWZlNDktNGU5YS1hZjllLWJhNmZjNDJkN2RjNSJ9LCJyb2xlIj
+   oiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiw
+   idGltZXN0YW1wIjoxNzc3MTgwNTc3fV0sInNlc3Npb25faWQiOiIyNTVjNTEyZC1iYjIwLTQ3NzYt
+   OGU0ZS0yZDM0MGE2ZjYyMjMiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.yQDEKcV91U0DA54QHiNpwE
+   nrpDioUdUKIHjNyEsp0qjrxOcjf20Y9G1thU_5nckMchg5q4Qt5tBcviNkO9WimQ",
+   "token_type": "bearer",
+   "expires_in": 3600,
+   "expires_at": 1777184177,
+   "refresh_token": "77n2gjpqw4gb",
+   "user": {
+   "id": "241735b5-fe49-4e9a-af9e-ba6fc42d7dc5",
+   "aud": "authenticated",
+   "role": "authenticated",
+   "email": "1234@com.com",
+   "email_confirmed_at": "2026-04-26T04:34:50.156677Z",
+   "phone": "",
+   "confirmed_at": "2026-04-26T04:34:50.156677Z",
+   "last_sign_in_at": "2026-04-26T05:16:17.97176221Z",
+   "app_metadata": {
+   "provider": "email",
+   "providers": [
+   "email"
+   ]
+   },
+   "user_metadata": {
+   "email": "1234@com.com",
+   "email_verified": true,
+   "phone_verified": false,
+   "sub": "241735b5-fe49-4e9a-af9e-ba6fc42d7dc5"
+   },
+   "identities": [
+   {
+   "identity_id": "4a5c4ac0-c26c-4aa8-9475-595a92d1f76b",
+   "id": "241735b5-fe49-4e9a-af9e-ba6fc42d7dc5",
+   "user_id": "241735b5-fe49-4e9a-af9e-ba6fc42d7dc5",
+   "identity_data": {
+   "email": "1234@com.com",
+   "email_verified": false,
+   "phone_verified": false,
+   "sub": "241735b5-fe49-4e9a-af9e-ba6fc42d7dc5"
+   },
+   "provider": "email",
+   "last_sign_in_at": "2026-04-26T04:34:50.152398Z",
+   "created_at": "2026-04-26T04:34:50.152455Z",
+   "updated_at": "2026-04-26T04:34:50.152455Z",
+   "email": "1234@com.com"
+   }
+   ],
+   "created_at": "2026-04-26T04:34:50.116138Z",
+   "updated_at": "2026-04-26T05:16:17.974186Z",
+   "is_anonymous": false
+   },
+   "weak_password": null
+   }
+   Create New User
+    Definition: Registers a new user account in both Supabase Auth and the local application
+   database.
+    UI Use Case: Used on the Sign Up Page. Upon success, the UI automatically logs the
+   user in and redirects them to the Onboarding Flow.
+   Request URL:
+   POST: {{baseUrl}}/auth/register
+   Payload:
+   {
+   "email": "tester@example.com",
+   "password": "password123",
+   "username": "tester_1",
+   "displayName": "Tester One",
+   "isSupporter": true,
+   "country": "US",
+   "currency": "USD"
+   }
+   Response
+   {
+   "access_token":
+   "eyJhbGciOiJFUzI1NiIsImtpZCI6IjFmZmY4NDFlLTgxOWMtNDhlOC1hYmUzLTNkYzc3YjEzZGUz
+   OCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2hkdWlteGxqZ3Byd21hc2RrZXRsLnN1cGFi
+   YXNlLmNvL2F1dGgvdjEiLCJzdWIiOiI3Mzg2ZTUxYS1lYThkLTRmNTgtODYxZi1hOGQxM2MyMTY0N
+   jciLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzc3MTkzODEzLCJpYXQiOjE3NzcxOTAyMT
+   MsImVtYWlsIjoidGVzdGVyQGV4YW1wbGUuY29tIiwicGhvbmUiOiIiLCJhcHBfbWV0YWRhdGEiOns
+   icHJvdmlkZXIiOiJlbWFpbCIsInByb3ZpZGVycyI6WyJlbWFpbCJdfSwidXNlcl9tZXRhZGF0YSI6
+   eyJlbWFpbCI6InRlc3RlckBleGFtcGxlLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZ
+   V92ZXJpZmllZCI6ZmFsc2UsInN1YiI6IjczODZlNTFhLWVhOGQtNGY1OC04NjFmLWE4ZDEzYzIxNj
+   Q2NyJ9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI
+   6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzc3MTkwMjEzfV0sInNlc3Npb25faWQiOiIzNWYzMTE0
+   ZS1iZGZhLTRkMzctYWI1Yy1kMWQzODIzMzBiNWYiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.KUOjgk
+   G89P_a02xYLVbIVUGIW8kE_iQ5gxbZCQWtzX9VW0EKval6EhKd0IFdsBX1heh07iZgitVJkqKA47c
+   DTA",
+   "token_type": "bearer",
+   "expires_in": 3600,
+   "expires_at": 1777193813,
+   "refresh_token": "htpm5peerajo",
+   "user": {
+   "id": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "aud": "authenticated",
+   "role": "authenticated",
+   "email": "tester@example.com",
+   "email_confirmed_at": "2026-04-26T07:56:53.691028531Z",
+   "phone": "",
+   "last_sign_in_at": "2026-04-26T07:56:53.698098828Z",
+   "app_metadata": {
+   "provider": "email",
+   "providers": [
+   "email"
+   ]
+   },
+   "user_metadata": {
+   "email": "tester@example.com",
+   "email_verified": true,
+   "phone_verified": false,
+   "sub": "7386e51a-ea8d-4f58-861f-a8d13c216467"
+   },
+   "identities": [
+   {
+   "identity_id": "9c6e9e5d-7d9d-41d1-8c15-7c4cb88703ec",
+   "id": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "user_id": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "identity_data": {
+   "email": "tester@example.com",
+   "email_verified": true,
+   "phone_verified": false,
+   "sub": "7386e51a-ea8d-4f58-861f-a8d13c216467"
+   },
+   "provider": "email",
+   "last_sign_in_at": "2026-04-26T07:56:53.687192729Z",
+   "created_at": "2026-04-26T07:56:53.687238Z",
+   "updated_at": "2026-04-26T07:56:53.687238Z",
+   "email": "tester@example.com"
+   }
+   ],
+   "created_at": "2026-04-26T07:56:53.675448Z",
+   "updated_at": "2026-04-26T07:56:53.701787Z",
+   "is_anonymous": false
+   }
+   }
+   Users Controller
+   Create User Profile (Run first for new accounts)
+    Definition: Initializes the application-specific user profile data (username, display name,
+   etc.) after authentication.
+    UI Use Case: Triggered automatically during the Onboarding Process if a user is
+   logging in for the first time. It ensures the local database is synced with the Supabase
+   Auth record.
+   Request URL:
+   {{baseUrl}}/users
+   Payload:
+   {
+   "username": "recovery_pro",
+   "displayName": "Master Warrior",
+   "bio": "Recovery advocate since 2026.",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+   "country": "IN",
+   "currency": "INR",
+   "isSupporter": false,
+   "leaderboardOptIn": true
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "username": "recovery_pro",
+   "displayName": "Master Warrior",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
+   "bio": "Recovery advocate since 2026.",
+   "country": "IN",
+   "currency": "INR",
+   "isSupporter": false,
+   "onboardingCompleted": false,
+   "quitDate": null,
+   "premiumStatus": "free",
+   "leaderboardOptIn": true,
+   "createdAt": "2026-04-26T05:41:20.724552Z"
+   }
+   Update Profile
+    Definition: Updates the authenticated user's profile information, including bio, avatar,
+   and notification preferences.
+    UI Use Case: Used in the Settings/Profile Page. It allows users to personalize their
+   experience, change their daily reminder time, and toggle leaderboard participation.
+   Request URL:
+   PATCH: {{baseUrl}}/users/me
+   Payload:
+   {
+   "displayName": "Recovering Pro",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "bio": "Sharing my journey to stay accountable.",
+   "country": "US",
+   "currency": "USD",
+   "notificationPrefs": "{\"daily_reminder\": true, \"weekly_report\":
+   true}",
+   "dailyReminderTime": "09:30:00",
+   "leaderboardOptIn": true
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "username": "recovery_pro",
+   "displayName": "Recovering Pro",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "bio": "Sharing my journey to stay accountable.",
+   "country": "US",
+   "currency": "USD",
+   "isSupporter": false,
+   "onboardingCompleted": false,
+   "quitDate": null,
+   "premiumStatus": "free",
+   "leaderboardOptIn": true,
+   "createdAt": "2026-04-26T05:41:20.724552Z"
+   }
+   Get My Profile
+    Definition: Retrieves the full profile details for the currently authenticated user.
+    UI Use Case: Used across the entire app to fetch the user's current status (e.g., if they are
+   a Premium/Sovereign user or a Supporter). It’s essential for the Dashboard and
+   Settings views.
+   Request URL:
+   GET: {{baseUrl}}/users/me
+   Payload:
+   none
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "username": "recovery_pro",
+   "displayName": "Recovering Pro",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "bio": "Sharing my journey to stay accountable.",
+   "country": "US",
+   "currency": "USD",
+   "isSupporter": false,
+   "onboardingCompleted": false,
+   "quitDate": null,
+   "premiumStatus": "free",
+   "leaderboardOptIn": true,
+   "createdAt": "2026-04-26T05:41:20.724552Z"
+   }
+   Get Public Profile
+    Definition: Retrieves the public-facing profile of another user by their unique username.
+    UI Use Case: Used when a user clicks on a friend or a stranger in the Leaderboard. It
+   shows the target user's bio, level, and recent badges (social proof).
+   Request URL:
+   GET: {{baseUrl}}/users/{{username}}
+   Payload:
+   none
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "username": "recovery_pro",
+   "displayName": "Recovering Pro",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "bio": "Sharing my journey to stay accountable.",
+   "country": "US",
+   "currency": "USD",
+   "isSupporter": false,
+   "onboardingCompleted": false,
+   "quitDate": null,
+   "premiumStatus": "free",
+   "leaderboardOptIn": true,
+   "createdAt": "2026-04-26T05:41:20.724552Z"
+   }
+   Delete My Account
+    Definition: Permanently removes the user's account and all associated data (habits,
+   check-ins, journal entries).
+    UI Use Case: A "danger zone" action in the Settings Page. The UI should wrap this in a
+   confirmation modal to prevent accidental deletion.
+   Request URL:
+   DELETE: {{baseUrl}}/users/me
+   Payload:
+   none
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "User @warrior_one (ID: 241735b5-fe49-4e9a-af9e-ba6fc42d7dc5)
+   has been successfully deleted.",
+   "status": "success"
+   }
+   Onboarding & Habits Controller
+   Get Onboarding Status
+    Definition: Checks if the user has completed the initial onboarding flow (setting up their
+   first habit).
+    UI Use Case: Used as a Root Redirector. If the app loads and this returns
+   onboardingCompleted: false, the UI forces the user into the Onboarding Wizard
+   before showing the Dashboard.
+   Request URL:
+   GET: {{baseUrl}}/onboarding/status
+   Payload:
+   none
+   Authorization: Bearer token from Login API response
+   Response:
+   {
+   "onboardingCompleted": false
+   }
+   Complete Onboarding
+    Definition: Saves the user's initial habit selection and profile setup in one batch
+   operation.
+    UI Use Case: The final step of the Onboarding Wizard. Once submitted, the UI shows
+   a celebration animation (Three.js) and unlocks the main Dashboard.
+   Request URL:
+   POST: {{baseUrl}}/onboarding/complete
+   Authorization: Bearer token from Login API response
+   Case 1 Payload/Response (When more then 1 habit is entered):
+   Payload
+   {
+   "displayName": "Onboarded User",
+   "country": "IN",
+   "currency": "INR",
+   "isSupporter": false,
+   "quitDate": "2026-04-20",
+   "habits": [
+   {
+   "habitId": "smoking",
+   "quitDate": "2026-04-20",
+   "cigarettesPerDay": 20,
+   "costPerCigarette": 15.5
+   },
+   {
+   "habitId": "drinking",
+   "quitDate": "2026-04-22",
+   "drinksPerWeek": 5,
+   "costPerSession": 1200
+   },
+   {
+   "habitId": "vaping",
+   "quitDate": "2026-04-24",
+   "podsPerWeek": 2,
+   "podCost": 450
+   },
+   {
+   "habitId": "social-media",
+   "quitDate": "2026-04-25",
+   "hoursPerDay": 4.5,
+   "platforms": ["Instagram", "TikTok"]
+   }
+   ]
+   }
+   Response
+   {
+   "status": 402,
+   "error": "Payment Required",
+   "message": "Free tier users can only track one active habit. Please
+   upgrade to Sovereign premium for unlimited habits.",
+   "timestamp": "2026-04-26T05:53:00.190448500Z"
+   }
+   Case 2 Payload/Response (When only 1 habit is entered):
+   Payload
+   {
+   "displayName": "Onboarded User",
+   "country": "IN",
+   "currency": "INR",
+   "isSupporter": false,
+   "quitDate": "2026-04-20",
+   "habits": [
+   {
+   "habitId": "drinking",
+   "quitDate": "2026-04-22",
+   "drinksPerWeek": 5,
+   "costPerSession": 1200
+   }
+   ]
+   }
+   Response
+   {
+   "message": "Onboarding completed successfully"
+   }
+   Get Habit Catalog
+    Definition: Fetches a list of all supported habits (Smoking, Drinking, Vaping, etc.) that
+   users can track.
+    UI Use Case: Used in the "Add New Habit" Modal or the Onboarding habit selection
+   screen. It provides the display names and icons for the grid of options.
+   Request URL:
+   GET: {{baseUrl}}/habits
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "slug": "smoking",
+   "displayName": "Smoking",
+   "icon": "ðŸš¬",
+   "description": null,
+   "sortOrder": 1,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "5223174f-a3ed-426f-b0a0-76281f25a3d5",
+   "slug": "drinking",
+   "displayName": "Drinking",
+   "icon": "ðŸ•º",
+   "description": null,
+   "sortOrder": 2,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "ff10480a-a99b-4663-8844-95793c01d7d6",
+   "slug": "vaping",
+   "displayName": "Vaping",
+   "icon": "ðŸ’¨",
+   "description": null,
+   "sortOrder": 3,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "3073c4b5-960c-424c-9e6f-e8bfcb49dd3d",
+   "slug": "chewing_tobacco",
+   "displayName": "Chewing Tobacco",
+   "icon": "ðŸŒ¿",
+   "description": null,
+   "sortOrder": 4,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "86d1f5b6-faba-4bf1-9698-dde8d4c16877",
+   "slug": "pornography",
+   "displayName": "Pornography",
+   "icon": "ðŸ”ž",
+   "description": null,
+   "sortOrder": 5,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "1f28722d-2cc1-4333-923c-6c11e71cd911",
+   "slug": "social_media",
+   "displayName": "Social Media",
+   "icon": "ðŸ“±",
+   "description": null,
+   "sortOrder": 6,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "5a98535a-cdc1-4a89-a7a9-dca4b1dc4bc0",
+   "slug": "sugar_junk_food",
+   "displayName": "Sugar & Junk Food",
+   "icon": "ðŸ•©",
+   "description": null,
+   "sortOrder": 7,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "57b81ebb-5717-416c-b0e5-d5ba6e550680",
+   "slug": "gambling",
+   "displayName": "Gambling",
+   "icon": "ðŸŽ°",
+   "description": null,
+   "sortOrder": 8,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   },
+   {
+   "id": "6ae386c1-dbaa-4191-9d44-fe0e5fe1b7c9",
+   "slug": "custom",
+   "displayName": "Custom Habit",
+   "icon": "âœ•ï¸•",
+   "description": null,
+   "sortOrder": 9,
+   "createdAt": "2026-04-26T03:41:36.113327Z"
+   }
+   ]
+   Get My Habits
+    Definition: Retrieves all habits that the current user is actively (or has previously)
+   tracked.
+    UI Use Case: Populates the Habits List on the Dashboard. It includes configuration
+   details like "cigarettes per day" or "pod cost" to calculate savings.
+   Request URL:
+   GET: {{baseUrl}}/habits/mine
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "2ad05b82-66c3-4aa8-b4ad-3348ecd35569",
+   "userId": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "habitId": "5223174f-a3ed-426f-b0a0-76281f25a3d5",
+   "quitDate": "2026-04-22",
+   "isActive": true,
+   "cigarettesPerDay": null,
+   "costPerCigarette": null,
+   "drinksPerWeek": 5,
+   "costPerSession": 1200.00,
+   "podsPerWeek": null,
+   "podCost": null,
+   "hoursPerDay": null,
+   "platforms": null,
+   "spendPerWeek": null,
+   "customDescription": null,
+   "customTimePerDay": null,
+   "customSpendPerDay": null,
+   "createdAt": "2026-04-26T05:55:53.778554Z",
+   "updatedAt": "2026-04-26T05:55:53.778554Z"
+   }
+   ]
+   Add Single Habit
+    Definition: Allows an existing user to start tracking a new habit.
+    UI Use Case: Used in the "Add New Habit" flow. Note: The UI must handle the 402
+   Payment Required error if a free user tries to add a second habit, prompting them to
+   upgrade to Sovereign Premium.
+   Request URL:
+   POST: {{baseUrl}}/habits/mine
+   Authorization: Bearer token from Login API response
+   Case 1 Payload/Response (When user already has 1 habit and tries to add another without
+   completing payment):
+   Payload
+   {
+   "habitId": "smoking",
+   "quitDate": "2026-04-26",
+   "cigarettesPerDay": 10,
+   "costPerCigarette": 15,
+   "customDescription": "Optional",
+   "customTimePerDay": 0.5,
+   "customSpendPerDay": 100
+   }
+   Response
+   {
+   "status": 402,
+   "error": "Payment Required",
+   "message": "Free tier users can only track one active habit. Please
+   upgrade to Sovereign premium for unlimited habits.",
+   "timestamp": "2026-04-26T06:03:03.888250300Z"
+   }
+   Case 2 payload/Response (when user has no habits and wants to add 1 without any current
+   habit):
+   Payload
+   {
+   "habitId": "smoking",
+   "quitDate": "2026-04-26",
+   "cigarettesPerDay": 10,
+   "costPerCigarette": 15,
+   "customDescription": "Optional",
+   "customTimePerDay": 0.5,
+   "customSpendPerDay": 100
+   }
+   Response
+   {
+   "id": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "userId": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "quitDate": "2026-04-26",
+   "isActive": true,
+   "cigarettesPerDay": 10,
+   "costPerCigarette": 15.00,
+   "drinksPerWeek": null,
+   "costPerSession": null,
+   "podsPerWeek": null,
+   "podCost": null,
+   "hoursPerDay": null,
+   "platforms": null,
+   "spendPerWeek": null,
+   "customDescription": "Optional",
+   "customTimePerDay": 0.50,
+   "customSpendPerDay": 100.00,
+   "createdAt": "2026-04-26T06:06:43.917864Z",
+   "updatedAt": "2026-04-26T06:06:43.917864Z"
+   }
+   Update Habit Config
+    Definition: Updates the configuration for a specific habit (e.g., increasing the cost per
+   session or changing the quit date).
+    UI Use Case: Used in the Habit Settings screen. Users can fine-tune their tracking
+   parameters as their life situation changes.
+   Request URL:
+   PUT: {{baseUrl}}/habits/mine/{{userHabitId}}
+   Payload:
+   {
+   "cigarettesPerDay": 12,
+   "costPerCigarette": 18,
+   "isActive": true
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "userId": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "quitDate": "2026-04-26",
+   "isActive": true,
+   "cigarettesPerDay": 12,
+   "costPerCigarette": 18.00,
+   "drinksPerWeek": null,
+   "costPerSession": null,
+   "podsPerWeek": null,
+   "podCost": null,
+   "hoursPerDay": null,
+   "platforms": null,
+   "spendPerWeek": null,
+   "customDescription": "Optional",
+   "customTimePerDay": 0.50,
+   "customSpendPerDay": 100.00,
+   "createdAt": "2026-04-26T06:06:43.917864Z",
+   "updatedAt": "2026-04-26T06:31:39.790382Z"
+   }
+   Deactivate Habit
+    Definition: Stops tracking a specific habit without deleting the history.
+    UI Use Case: Used in Habit Settings. The UI should mark the habit as "Archived" or
+   remove it from the active Dashboard.
+   Request URL:
+   DELETE: {{baseUrl}}/habits/mine/{{userHabitId}}
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Habit with ID 2a77ddf7-18fc-4741-84a2-5371f789d67d has been
+   successfully deactivated.",
+   "status": "success"
+   }
+   Check-ins & History
+   Submit Check-in
+    Definition: Reports the daily status of a habit (Clean or Slipped), along with mood and
+   optional notes.
+    UI Use Case: The most frequent interaction in the app! Used in the Daily Check-in
+   Card. Upon submission, the UI displays XP earned, new streaks, and potentially a
+   Withdrawal Empathy Message if the user slipped.
+   Request URL:
+   POST: {{baseUrl}}/checkins
+   Authorization: Bearer token from Login API response
+   Case 1 Payload/Response (Clean):
+   Payload
+   {
+   "userHabitId": "{{userHabitId}}",
+   "status": "clean",
+   "mood": "PROUD",
+   "note": "Stayed strong today! Exercise really helped with the afternoon
+   cravings."
+   }
+   Response
+   {
+   "checkIn": {
+   "id": "cf2ed7fa-cae8-4221-8955-64b7555cc7c1",
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "checkinDate": "2026-04-26",
+   "status": "clean",
+   "mood": "PROUD",
+   "slipReason": null,
+   "note": "Stayed strong today! Exercise really helped with the
+   afternoon cravings.",
+   "createdAt": "2026-04-26T06:44:17.507393Z"
+   },
+   "newStreak": 1,
+   "xpEarned": 25,
+   "badgesEarned": [
+   "first_day"
+   ],
+   "milestoneReached": false,
+   "withdrawalMessage": null
+   }
+   Case 2 Payload/Response (Slipped):
+   Payload
+   {
+   "userHabitId": "{{userHabitId}}",
+   "status": "slipped",
+   "mood": "REGRETFUL",
+   "slipReason": "SOCIAL_PRESSURE",
+   "note": "Was out with friends and they were all smoking. I gave in. Need
+   a plan for next time."
+   }
+   Response
+   {
+   "checkIn": {
+   "id": "cf2ed7fa-cae8-4221-8955-64b7555cc7c1",
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "checkinDate": "2026-04-26",
+   "status": "slipped",
+   "mood": "REGRETFUL",
+   "slipReason": "SOCIAL_PRESSURE",
+   "note": "Was out with friends and they were all smoking. I gave in.
+   Need a plan for next time.",
+   "createdAt": "2026-04-26T06:44:17.507393Z"
+   },
+   "newStreak": 0,
+   "xpEarned": 0,
+   "badgesEarned": [],
+   "milestoneReached": false,
+   "withdrawalMessage": "Relapses are part of the journey. Take a deep
+   breath, identify the trigger (like SOCIAL_PRESSURE), and start again. You've
+   got this."
+   }
+   Case 3 Payload/Response (Checked in Slipped and trying to Check In Clean):
+   Payload
+   {
+   "userHabitId": "{{userHabitId}}",
+   "status": "clean",
+   "mood": "PROUD",
+   "note": "Stayed strong today! Exercise really helped with the afternoon
+   cravings."
+   }
+   Response
+   {
+   "status": 400,
+   "error": "Validation Error",
+   "message": "You already reported a slip today. Stay strong and focus on
+   tomorrow.",
+   "timestamp": "2026-04-26T07:13:48.080945500Z"
+   }
+   Check-in History
+    Definition: Retrieves a chronological list of check-ins for a specific habit.
+    UI Use Case: Used to build the Activity Feed or History Tab for a habit. It shows the
+   user's journey over the last 30+ days, including their notes and mood trends.
+   Request URL:
+   GET: {{baseUrl}}/checkins/history/{{userHabitId}}?days=30
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "cf2ed7fa-cae8-4221-8955-64b7555cc7c1",
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "checkinDate": "2026-04-26",
+   "status": "slipped",
+   "mood": "REGRETFUL",
+   "slipReason": "SOCIAL_PRESSURE",
+   "note": "Was out with friends and they were all smoking. I gave in.
+   Need a plan for next time.",
+   "createdAt": "2026-04-26T06:44:17.507393Z"
+   },
+   ...
+   ]
+   Has Checked In Today?
+    Definition: A quick check to see if the user has already reported their status for the
+   current day.
+    UI Use Case: Drives the Dashboard Reminder. If false, the UI displays a prominent
+   "Time to Check-in" call-to-action (CTA).
+   Request URL:
+   GET: {{baseUrl}}/checkins/today
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "hasCheckedInToday": true
+   }
+   Streaks
+   Get All My Streaks
+    Definition: Fetches current and longest streak data for all of the user's habits.
+    UI Use Case: Used on the Main Dashboard to show the large "Days Clean" numbers.
+   It’s the primary motivational metric shown to the user.
+   Request URL:
+   GET: {{baseUrl}}/streaks
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "586f246f-0638-456d-a290-b738a3f45eff",
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "currentStreak": 0,
+   "longestStreak": 1,
+   "lastCheckinDate": "2026-04-26",
+   "totalCleanDays": 0,
+   "isActive": true,
+   "createdAt": "2026-04-26T06:06:43.917864Z",
+   "updatedAt": "2026-04-26T07:11:22.53442Z"
+   },
+   {
+   "id": "600198cd-5002-4cab-a562-1b2ce177c04d",
+   "userHabitId": "2ad05b82-66c3-4aa8-b4ad-3348ecd35569",
+   "currentStreak": 0,
+   "longestStreak": 0,
+   "lastCheckinDate": null,
+   "totalCleanDays": 0,
+   "isActive": false,
+   "createdAt": "2026-04-26T05:55:53.778554Z",
+   "updatedAt": "2026-04-26T05:55:53.778554Z"
+   }
+   ]
+   Get Specific Habit Streak
+    Definition: Retrieves detailed streak metrics for a single habit.
+    UI Use Case: Used on the Habit Detail Page. It allows for habit-specific deep dives into
+   progress and consistency.
+   Request URL:
+   GET: {{baseUrl}}/streaks/{{userHabitId}}
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "586f246f-0638-456d-a290-b738a3f45eff",
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "currentStreak": 0,
+   "longestStreak": 1,
+   "lastCheckinDate": "2026-04-26",
+   "totalCleanDays": 0,
+   "isActive": true,
+   "createdAt": "2026-04-26T06:06:43.917864Z",
+   "updatedAt": "2026-04-26T07:11:22.53442Z"
+   }
+   Friends & Search
+   Search Users
+    Definition: Searches the platform for other users by username or display name.
+    UI Use Case: Used in the "Add Friends" search bar. It provides a list of potential
+   accountability partners to connect with.
+   Request URL:
+   GET: {{baseUrl}}/friends/search?q=tester
+   Payload:
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "username": "tester_1",
+   "displayName": "Tester One",
+   "avatarUrl": null,
+   "bio": null,
+   "country": "US",
+   "currency": "USD",
+   "isSupporter": true,
+   "onboardingCompleted": false,
+   "quitDate": null,
+   "pushSubscription": null,
+   "notificationPrefs": "{\"challenges\": true, \"milestones\": true,
+   \"weekly_report\": true, \"daily_reminder\": true, \"relapse_support\": true,
+   \"friend_milestones\": true, \"withdrawal_warnings\": true}",
+   "dailyReminderTime": "09:00:00",
+   "premiumStatus": "free",
+   "stripeCustomerId": null,
+   "leaderboardOptIn": true,
+   "createdAt": "2026-04-26T07:56:54.293228Z",
+   "updatedAt": "2026-04-26T07:56:54.293228Z"
+   }
+   ]
+   Send Friend Request
+    Definition: Sends an invitation to another user to become accountability partners.
+    UI Use Case: Triggered when the user clicks "Connect" on a search result. The UI
+   should show a "Pending" state after this call.
+   Request URL:
+   {{baseUrl}}/friends/request
+   Payload:
+   {
+   "addresseeUsername": "{{username}}"
+   }
+   Authorization: Bearer token from Login API response
+   Response when friend is valid
+   {
+   "message": "Friend request sent successfully"
+   }
+   Response when friend status is pending
+   {
+   "status": 400,
+   "error": "Validation Error",
+   "message": "A relationship already exists between you and this user
+   (status: pending)",
+   "timestamp": "2026-04-26T08:00:45.023935500Z"
+   }
+   Response when friend is invalid
+   {
+   "status": 404,
+   "error": "Not Found",
+   "message": "User not found with username: tester_1123451",
+   "timestamp": "2026-04-26T08:01:41.592818800Z"
+   }
+   Get Pending Requests
+    Definition: Retrieves a list of friend requests that the current user has received and not
+   yet answered.
+    UI Use Case: Populates the Notification Center or Social Tab with a "New Request"
+   badge, allowing the user to Accept or Decline.
+   Request URL:
+   GET: {{baseUrl}}/friends/pending
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "7400f30c-e29e-4483-be48-a5933614acc6",
+   "requesterId": "86d2bcc3-f46b-4b30-84ae-c36606de2671",
+   "addresseeId": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "status": "pending",
+   "createdAt": "2026-04-26T08:00:25.99312Z",
+   "updatedAt": "2026-04-26T08:00:25.99312Z"
+   }
+   ]
+   Respond to Friend Request
+    Definition: Accepts or declines a pending friend request.
+    UI Use Case: Used for the "Accept" and "Decline" buttons in the Social Tab. Accepting
+   immediately creates a reciprocal social link.
+   Request URL:
+   PUT: {{baseUrl}}/friends/{{friendId}}/respond
+   Payload:
+   {
+   "response": "ACCEPTED"
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Friend request ACCEPTED"
+   }
+   Get Friends List
+    Definition: Retrieves a list of all confirmed accountability partners.
+    UI Use Case: Populates the Social/Friends Feed. It allows users to see their friends'
+   progress and send challenges (if implemented).
+   Request URL:
+   GET: {{baseUrl}}/friends
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "7400f30c-e29e-4483-be48-a5933614acc6",
+   "requesterId": "86d2bcc3-f46b-4b30-84ae-c36606de2671",
+   "addresseeId": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "status": "accepted",
+   "createdAt": "2026-04-26T08:00:25.99312Z",
+   "updatedAt": "2026-04-26T08:06:28.432712Z"
+   }
+   ]
+   Remove Friend
+    Definition: Ends an accountability partnership.
+    UI Use Case: A settings option within the Friends List. It allows users to prune their
+   social network.
+   Request URL:
+   DELETE: {{baseUrl}}/friends/{{friendId}}
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Friendship record [ID] has been successfully removed.",
+   "status": "success"
+   }
+   Analytics & Dashboard
+   Dashboard Summary
+    Definition: A high-level aggregate of active habits, money saved (today/week/month),
+   current level, and recent badges.
+    UI Use Case: The primary data source for the Main Dashboard. It provides
+   everything needed to render the "Overview" screen in a single request, including the
+   Today's Motivational Message.
+   Request URL:
+   GET: {{baseUrl}}/dashboard/summary
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "habits": [
+   {
+   "userHabitId": "2a77ddf7-18fc-4741-84a2-5371f789d67d",
+   "habitName": "Smoking",
+   "habitIcon": "ðŸš¬",
+   "currentStreak": 0,
+   "isActive": true
+   },
+   {
+   "userHabitId": "2ad05b82-66c3-4aa8-b4ad-3348ecd35569",
+   "habitName": "Drinking",
+   "habitIcon": "ðŸ•º",
+   "currentStreak": 0,
+   "isActive": false
+   }
+   ],
+   "totalSavedToday": 0,
+   "totalSavedWeek": 0,
+   "totalSavedMonth": 0,
+   "totalSavedAllTime": 0,
+   "level": 1,
+   "xp": 0,
+   "recentBadges": [
+   {
+   "id": "7105b5ed-3aad-444f-a121-59a0766c505c",
+   "slug": "first_day",
+   "name": "Day One",
+   "description": "You started. That's everything.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 25,
+   "triggerType": "streak_days",
+   "triggerValue": 1,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   ],
+   "todayMessage": {
+   "id": "10a6636d-2d39-4c4b-ac02-bc4ae7f6f027",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 0,
+   "message": "Your lungs are already starting to clear. The carbon
+   monoxide in your blood is dropping.",
+   "tone": "empathetic",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   },
+   "dopamineSuggestions": [
+   {
+   "id": "379bd459-1a90-4772-9974-8a4934d29a24",
+   "suggestion": "Take a 5-minute ice-cold shower to trigger a
+   massive natural dopamine spike.",
+   "category": "physical",
+   "habitSlugs": [
+   "smoking",
+   "drinking",
+   "pornography",
+   "gambling"
+   ],
+   "difficulty": "hard",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   },
+   {
+   "id": "3f1e14c2-971b-4af8-bb65-e67e10ffb2a6",
+   "suggestion": "Eat a small piece of 85%+ dark chocolate. It
+   triggers endorphins without the sugar crash.",
+   "category": "physical",
+   "habitSlugs": [
+   "sugar_junk_food",
+   "drinking"
+   ],
+   "difficulty": "easy",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   },
+   {
+   "id": "e9888dee-b673-4541-a6a9-dca039463e2c",
+   "suggestion": "Go for a 15-minute run. The \"runner's high\" is a
+   real biochemical reset.",
+   "category": "physical",
+   "habitSlugs": [
+   "smoking",
+   "vaping",
+   "sugar_junk_food"
+   ],
+   "difficulty": "medium",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   }
+   ]
+   }
+   Money Saved Breakdown
+    Definition: Calculates exactly how much money the user has saved for a specific habit
+   across different timeframes.
+    UI Use Case: Populates the "Money Saved" widget. The UI uses these numbers to
+   show progress toward financial goals.
+   Request URL:
+   GET: {{baseUrl}}/analytics/money/{{userHabitId}}
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "today": 36,
+   "week": 216,
+   "month": 1036,
+   "allTime": 3231
+   }
+   Graph-Ready Analytics
+    Definition: Returns time-series data (Daily, Weekly, Monthly) formatted specifically for
+   charts.
+    UI Use Case: Directly feeds into Chart components (like Recharts or Chart.js) to
+   show the growth of savings over time.
+   Request URL:
+   GET: {{baseUrl}}/analytics/money/{{userHabitId}}/series
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "daily": [
+   { "label": "2026-04-20", "value": 3 },
+   { "label": "2026-04-21", "value": 5 },
+   { "label": "2026-04-22", "value": 4 },
+   { "label": "2026-04-23", "value": 6 },
+   { "label": "2026-04-24", "value": 8 },
+   { "label": "2026-04-25", "value": 7 },
+   { "label": "2026-04-26", "value": 9 }
+   ],
+   "weekly": [
+   { "label": "Week 2026-03-30", "value": 18 },
+   { "label": "Week 2026-04-06", "value": 24 },
+   { "label": "Week 2026-04-13", "value": 31 },
+   { "label": "Week 2026-04-20", "value": 42 }
+   ],
+   "monthly": [
+   { "label": "MAY 2025", "value": 40 },
+   { "label": "JUNE 2025", "value": 55 },
+   { "label": "JULY 2025", "value": 70 },
+   { "label": "AUGUST 2025", "value": 65 },
+   { "label": "SEPTEMBER 2025", "value": 85 },
+   { "label": "OCTOBER 2025", "value": 95 },
+   { "label": "NOVEMBER 2025", "value": 110 },
+   { "label": "DECEMBER 2025", "value": 130 },
+   { "label": "JANUARY 2026", "value": 150 },
+   { "label": "FEBRUARY 2026", "value": 170 },
+   { "label": "MARCH 2026", "value": 190 },
+   { "label": "APRIL 2026", "value": 210 }
+   ]
+   }
+   Heatmap Data (Params)
+    Definition: Provides a simplified map of check-in statuses (Clean/Slipped) for the last 12
+   months.
+    UI Use Case: Renders a GitHub-style contribution grid (Heatmap) for the habit.
+   Darker or distinct colors represent "Clean" days, creating a visual "Don't Break the
+   Chain" effect.
+   Request URL:
+   GET: {{baseUrl}}/analytics/heatmap/{{userHabitId}}?months=12
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "date": "2025-12-27",
+   "status": "clean"
+   },
+   {
+   "date": "2025-12-28",
+   "status": "clean"
+   },
+   {
+   "date": "2025-12-29",
+   "status": "clean"
+   },
+   {
+   "date": "2025-12-30",
+   "status": "clean"
+   },
+   {
+   "date": "2025-12-31",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-01",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-02",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-03",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-04",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-05",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-06",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-07",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-08",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-09",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-10",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-11",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-12",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-13",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-14",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-15",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-16",
+   "status": "slipped"
+   },
+   {
+   "date": "2026-01-17",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-18",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-19",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-20",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-21",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-22",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-23",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-24",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-25",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-26",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-27",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-28",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-29",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-30",
+   "status": "clean"
+   },
+   {
+   "date": "2026-01-31",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-01",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-02",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-03",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-04",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-05",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-06",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-07",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-08",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-09",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-10",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-11",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-12",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-13",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-14",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-15",
+   "status": "slipped"
+   },
+   {
+   "date": "2026-02-16",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-17",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-18",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-19",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-20",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-21",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-22",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-23",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-24",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-25",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-26",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-27",
+   "status": "clean"
+   },
+   {
+   "date": "2026-02-28",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-01",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-02",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-03",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-04",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-05",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-06",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-07",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-08",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-09",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-10",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-11",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-12",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-13",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-14",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-15",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-16",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-17",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-18",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-19",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-20",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-21",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-22",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-23",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-24",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-25",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-26",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-27",
+   "status": "slipped"
+   },
+   {
+   "date": "2026-03-28",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-29",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-30",
+   "status": "clean"
+   },
+   {
+   "date": "2026-03-31",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-01",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-02",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-03",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-04",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-05",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-06",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-07",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-08",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-09",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-10",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-11",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-12",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-13",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-14",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-15",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-16",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-17",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-18",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-19",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-20",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-21",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-22",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-23",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-24",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-25",
+   "status": "clean"
+   },
+   {
+   "date": "2026-04-26",
+   "status": "clean"
+   }
+   ]Global StatsGlobal Stats
+   Global Stats
+    Definition: Returns platform-wide aggregates (Total Users, Total Money Saved).
+    UI Use Case: Used on the Public Landing Page or App Stats screen to provide social
+   proof of the app's impact on the global community.
+   Request URL:
+   GET: {{baseUrl}}/analytics/global
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "totalUsers": 9,
+   "totalHabitsTracked": 7,
+   "totalCleanDays": 118,
+   "totalMoneySaved": 17700.00
+   }
+   Journal
+   Save Entry
+    Definition: Saves a daily reflection, mood score, triggers, and "what helped"
+   information.
+    UI Use Case: Used on the Journaling Page. It rewards the user with XP for practicing
+   mindfulness and helps them identify patterns in their recovery.
+   Request URL:
+   POST: {{baseUrl}}/journal
+   Payload:
+   {
+   "entryDate": "2026-04-26",
+   "content": "Full reflection on triggers and progress.",
+   "moodScore": 9,
+   "moodEmoji": "😊",
+   "triggers": ["stress", "evening"],
+   "whatHelped": "Meditation",
+   "isShared": true,
+   "sharedWith": ["{{friendId}}"]
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "65553058-c66d-433e-97a8-d54af59152a1",
+   "message": "Journal entry created successfully. XP awarded!",
+   "entryDate": "2024-04-28",
+   "xpEarned": 25
+   }
+   Get My Entries (Params)
+    Definition: Retrieves a list of the user's past journal entries.
+    UI Use Case: Populates the Journal History Feed. Users can scroll through their past
+   thoughts and mood trends.
+   Request URL:
+   GET: {{baseUrl}}/journal?limit=30
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "65553058-c66d-433e-97a8-d54af59152a1",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "entryDate": "2026-04-26",
+   "content": "Full reflection on triggers and progress.",
+   "moodScore": 9,
+   "moodEmoji": "😊",
+   "triggers": [
+   "stress",
+   "evening"
+   ],
+   "whatHelped": "Meditation",
+   "isShared": true,
+   "sharedWith": [
+   "7400f30c-e29e-4483-be48-a5933614acc6"
+   ],
+   "createdAt": "2026-04-28T11:58:50.711093Z",
+   "updatedAt": "2026-04-28T11:58:50.711093Z"
+   }
+   ]
+   Get Entry by Date
+    Definition: Fetches the specific journal entry for a given day.
+    UI Use Case: Used in the Calendar View. When a user clicks a specific date, the UI
+   calls this to show what they wrote that day.
+   Request URL:
+   GET: {{baseUrl}}/journal/2026-04-26
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "65553058-c66d-433e-97a8-d54af59152a1",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "entryDate": "2026-04-26",
+   "content": "Full reflection on triggers and progress.",
+   "moodScore": 9,
+   "moodEmoji": "😊",
+   "triggers": [
+   "stress",
+   "evening"
+   ],
+   "whatHelped": "Meditation",
+   "isShared": true,
+   "sharedWith": [
+   "7400f30c-e29e-4483-be48-a5933614acc6"
+   ],
+   "createdAt": "2026-04-28T11:58:50.711093Z",
+   "updatedAt": "2026-04-28T11:58:50.711093Z"
+   }
+   Get Shared Entries
+    Definition: Retrieves journal entries shared by friends for accountability.
+    UI Use Case: Populates the "Friends Activity" Feed. It allows users to see their friends'
+   reflections (if they opted to share) and provide support.
+   Request URL:
+   GET: {{baseUrl}}/journal/shared
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+   "userId": "user-uuid-of-your-friend",
+   "entryDate": "2026-04-27",
+   "content": "Had a tough day but stayed strong. Shared this to stay
+   accountable.",
+   "moodScore": 6,
+   "moodEmoji": "😟",
+   "triggers": ["Stress", "Fatigue"],
+   "whatHelped": "Talked to a friend",
+   "isShared": true,
+   "sharedWith": [
+   "your-user-uuid",
+   "another-friend-uuid"
+   ],
+   "createdAt": "2026-04-27T10:00:00Z",
+   "updatedAt": "2026-04-27T10:00:00Z"
+   }
+   ]
+   Gamification
+   XP Summary
+    Definition: Provides current XP, level progress (XP needed for next level), and a history
+   of recent XP-earning events.
+    UI Use Case: Drives the XP Progress Bar and Level Badge in the UI header. The event
+   list is often shown in a "Recent Activity" or "Quest Log" section.
+   Request URL:
+   GET: {{baseUrl}}/xp/summary
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "xpToNextLevel": 1810,
+   "recentEvents": [
+   {
+   "id": "8e950acd-a3b8-4ec9-9128-4fff303cca34",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "journal_entry",
+   "xpAmount": 15,
+   "referenceId": "65553058-c66d-433e-97a8-d54af59152a1",
+   "description": "Journal entry for 2026-04-26",
+   "createdAt": "2026-04-28T11:58:50.711093Z"
+   },
+   {
+   "id": "3b534e3b-51d9-43ea-9b44-f61e904bd266",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "badge_earned",
+   "xpAmount": 500,
+   "referenceId": "85e1ebcf-baa2-4949-b5fd-f632adada74e",
+   "description": "Earned badge: 30-Day Legend",
+   "createdAt": "2026-04-26T09:44:06.415062Z"
+   },
+   {
+   "id": "098a3a10-0dd0-44f5-a22e-5bb86396403a",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "daily_checkin",
+   "xpAmount": 50,
+   "referenceId": "ba0376e0-7c47-49c7-ac22-32442684fb45",
+   "description": "Daily clean check-in (Tiered Reward)",
+   "createdAt": "2026-04-26T09:44:06.415062Z"
+   },
+   {
+   "id": "9dd919d2-4423-44d6-8723-1f917e336ea6",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "badge_earned",
+   "xpAmount": 200,
+   "referenceId": "ddd06ea6-9e4a-4443-b4bf-25574ccf3928",
+   "description": "Earned badge: Two Week Titan",
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "5d538eaa-6920-4b6b-9ee1-242adcbe14a0",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "badge_earned",
+   "xpAmount": 100,
+   "referenceId": "b6412a25-4375-4035-91d7-16858a537b10",
+   "description": "Earned badge: First Week Warrior",
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "e3ed6b83-f77f-4f79-b83e-5c9159b702c1",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "badge_earned",
+   "xpAmount": 25,
+   "referenceId": "7105b5ed-3aad-444f-a121-59a0766c505c",
+   "description": "Earned badge: Day One",
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "9e74637b-c0e1-415b-803f-d04d47e8a31f",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "daily_checkin",
+   "xpAmount": 50,
+   "referenceId": "c3a2e207-f3b0-4a19-af62-df26e6c77738",
+   "description": "Daily clean check-in (Tiered Reward)",
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "503cf330-803a-42ad-bf8e-4484cec5f9bd",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "daily_checkin",
+   "xpAmount": 25,
+   "referenceId": "e37417ac-315a-4cf4-b890-46e29ee0a6fc",
+   "description": "Daily clean check-in (Tiered Reward)",
+   "createdAt": "2026-04-26T09:43:54.91007Z"
+   },
+   {
+   "id": "8f724c1b-6853-4ea1-898b-88b5e3b5eaad",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "daily_checkin",
+   "xpAmount": 25,
+   "referenceId": "c1445fb7-71b1-4bdf-82d3-0f2c325d76e7",
+   "description": "Daily clean check-in (Tiered Reward)",
+   "createdAt": "2026-04-26T09:43:49.955147Z"
+   },
+   {
+   "id": "8ebe64a3-3396-417a-ae7b-d45f9234a499",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "eventType": "daily_checkin",
+   "xpAmount": 25,
+   "referenceId": "b235fb32-c20e-41ec-84a4-d4b394cb124a",
+   "description": "Daily clean check-in (Tiered Reward)",
+   "createdAt": "2026-04-26T09:43:45.054859Z"
+   }
+   ],
+   "totalXp": 4190,
+   "currentLevel": {
+   "levelNumber": 7,
+   "name": "Reclaimer",
+   "xpRequired": 4000
+   }
+   }
+   All Badges with Status
+    Definition: Returns a comprehensive list of all possible badges in the system. For each
+   badge, it includes a boolean flag (e.g., isEarned) and the earn date if applicable,
+   indicating whether the current user has unlocked it yet.
+    UI Use Case: This is used to build the "Collection" or "Roadmap" screen.
+   o Visual Differentiation: The UI uses this data to render earned badges in full
+   color and locked badges in a semi-transparent or grayscale "silhouette" mode.
+   o Motivation: It allows the user to see exactly what they haven't achieved yet (e.g.,
+   "Year One Legend"), turning the recovery journey into a completionist goal.
+   Request URL:
+   GET: {{baseUrl}}/badges
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "earned": true,
+   "badge": {
+   "id": "7105b5ed-3aad-444f-a121-59a0766c505c",
+   "slug": "first_day",
+   "name": "Day One",
+   "description": "You started. That's everything.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 25,
+   "triggerType": "streak_days",
+   "triggerValue": 1,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "b6412a25-4375-4035-91d7-16858a537b10",
+   "slug": "first_week",
+   "name": "First Week Warrior",
+   "description": "7 days. Your brain is already changing.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 100,
+   "triggerType": "streak_days",
+   "triggerValue": 7,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "ddd06ea6-9e4a-4443-b4bf-25574ccf3928",
+   "slug": "two_weeks",
+   "name": "Two Week Titan",
+   "description": "14 days. Your cilia are regenerating.",
+   "iconUrl": null,
+   "rarity": "rare",
+   "xpReward": 200,
+   "triggerType": "streak_days",
+   "triggerValue": 14,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "85e1ebcf-baa2-4949-b5fd-f632adada74e",
+   "slug": "thirty_days",
+   "name": "30-Day Legend",
+   "description": "One month. Dopamine is rebuilding.",
+   "iconUrl": null,
+   "rarity": "epic",
+   "xpReward": 500,
+   "triggerType": "streak_days",
+   "triggerValue": 30,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": false,
+   "badge": {
+   "id": "86a6e401-be3d-4a3c-af31-b2e96b2f3d9a",
+   "slug": "sixty_days",
+   "name": "60-Day Champion",
+   "description": "Two months. The habit is losing its grip.",
+   "iconUrl": null,
+   "rarity": "epic",
+   "xpReward": 750,
+   "triggerType": "streak_days",
+   "triggerValue": 60,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": false,
+   "badge": {
+   "id": "113c71b8-ad6d-4834-a416-9825f654a366",
+   "slug": "ninety_days",
+   "name": "Ninety Day Sovereign",
+   "description": "Three months. You have reclaimed yourself.",
+   "iconUrl": null,
+   "rarity": "legendary",
+   "xpReward": 1000,
+   "triggerType": "streak_days",
+   "triggerValue": 90,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": false,
+   "badge": {
+   "id": "c5a818a5-8952-4bd6-83a5-314bd88cace8",
+   "slug": "one_year",
+   "name": "Year One Legend",
+   "description": "One year. You are a different person now.",
+   "iconUrl": null,
+   "rarity": "legendary",
+   "xpReward": 5000,
+   "triggerType": "streak_days",
+   "triggerValue": 365,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "d005ab4a-5629-4611-bb69-8e0ca011aaf0",
+   "slug": "money_saver_1k",
+   "name": "Saver",
+   "description": "Saved your first â‚¹1,000.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 50,
+   "triggerType": "money_saved",
+   "triggerValue": 1000,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "a5b54b05-d33d-4dc6-afc5-76feb9b61000",
+   "slug": "money_saver_10k",
+   "name": "Smart Money",
+   "description": "Saved â‚¹10,000. That's a real number.",
+   "iconUrl": null,
+   "rarity": "rare",
+   "xpReward": 200,
+   "triggerType": "money_saved",
+   "triggerValue": 10000,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": false,
+   "badge": {
+   "id": "0e9a17d0-46c7-45e7-88ed-1dc902da7e3a",
+   "slug": "accountability_champ",
+   "name": "Accountability Champ",
+   "description": "Completed 10 photo challenges.",
+   "iconUrl": null,
+   "rarity": "rare",
+   "xpReward": 300,
+   "triggerType": "challenges_completed",
+   "triggerValue": 10,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": true,
+   "badge": {
+   "id": "44cd14d6-451a-4612-a845-868693b5f472",
+   "slug": "rising_again",
+   "name": "Rising Again",
+   "description": "Came back after a slip and held for 7 days.",
+   "iconUrl": null,
+   "rarity": "epic",
+   "xpReward": 400,
+   "triggerType": "relapse_recovery",
+   "triggerValue": 7,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   },
+   {
+   "earned": false,
+   "badge": {
+   "id": "7c1021e2-a30d-4336-94e4-337b3ab5c0d0",
+   "slug": "dopamine_rebuilt",
+   "name": "Dopamine Rebuilt",
+   "description": "Hit Day 90. Your receptors are nearly baseline.",
+   "iconUrl": null,
+   "rarity": "legendary",
+   "xpReward": 1000,
+   "triggerType": "streak_days",
+   "triggerValue": 90,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   }
+   ]
+   Earned Badges
+    Definition: Lists all badges the user has unlocked, including description and rarity.
+    UI Use Case: Populates the "Badges/Trophy Case" screen. It celebrates milestones and
+   encourages users to "collect them all."
+   Request URL:
+   GET: {{baseUrl}}/badges/earned
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "85e1ebcf-baa2-4949-b5fd-f632adada74e",
+   "slug": "thirty_days",
+   "name": "30-Day Legend",
+   "description": "One month. Dopamine is rebuilding.",
+   "iconUrl": null,
+   "rarity": "epic",
+   "xpReward": 500,
+   "triggerType": "streak_days",
+   "triggerValue": 30,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "7105b5ed-3aad-444f-a121-59a0766c505c",
+   "slug": "first_day",
+   "name": "Day One",
+   "description": "You started. That's everything.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 25,
+   "triggerType": "streak_days",
+   "triggerValue": 1,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "b6412a25-4375-4035-91d7-16858a537b10",
+   "slug": "first_week",
+   "name": "First Week Warrior",
+   "description": "7 days. Your brain is already changing.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 100,
+   "triggerType": "streak_days",
+   "triggerValue": 7,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "ddd06ea6-9e4a-4443-b4bf-25574ccf3928",
+   "slug": "two_weeks",
+   "name": "Two Week Titan",
+   "description": "14 days. Your cilia are regenerating.",
+   "iconUrl": null,
+   "rarity": "rare",
+   "xpReward": 200,
+   "triggerType": "streak_days",
+   "triggerValue": 14,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "a5b54b05-d33d-4dc6-afc5-76feb9b61000",
+   "slug": "money_saver_10k",
+   "name": "Smart Money",
+   "description": "Saved â‚¹10,000. That's a real number.",
+   "iconUrl": null,
+   "rarity": "rare",
+   "xpReward": 200,
+   "triggerType": "money_saved",
+   "triggerValue": 10000,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "44cd14d6-451a-4612-a845-868693b5f472",
+   "slug": "rising_again",
+   "name": "Rising Again",
+   "description": "Came back after a slip and held for 7 days.",
+   "iconUrl": null,
+   "rarity": "epic",
+   "xpReward": 400,
+   "triggerType": "relapse_recovery",
+   "triggerValue": 7,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   },
+   {
+   "id": "d005ab4a-5629-4611-bb69-8e0ca011aaf0",
+   "slug": "money_saver_1k",
+   "name": "Saver",
+   "description": "Saved your first â‚¹1,000.",
+   "iconUrl": null,
+   "rarity": "common",
+   "xpReward": 50,
+   "triggerType": "money_saved",
+   "triggerValue": 1000,
+   "habitSlug": null,
+   "createdAt": "2026-04-26T03:41:44.15349Z"
+   }
+   ]
+   Friends Leaderboard
+    Definition: Ranks the user and their friends based on total XP and clean days.
+    UI Use Case: Populates the "Friends" tab on the Leaderboard screen. It creates
+   healthy competition and social accountability.
+   Request URL:
+   GET: {{baseUrl}}/leaderboard/friends
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "userId": "uuid-of-top-friend",
+   "username": "SuperQuitter",
+   "avatarUrl":
+   "https://api.dicebear.com/7.x/avataaars/svg?seed=SuperQuitter",
+   "totalCleanDays": 45,
+   "longestStreak": 30,
+   "totalXp": 2500,
+   "level": 12,
+   "rank": 1
+   },
+   {
+   "userId": "your-user-uuid",
+   "username": "You",
+   "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=You",
+   "totalCleanDays": 15,
+   "longestStreak": 15,
+   "totalXp": 1200,
+   "level": 8,
+   "rank": 2
+   }
+   ]
+   Global Leaderboard
+    Definition: Ranks all users on the platform who have opted into the leaderboard.
+    UI Use Case: Populates the "Global" tab on the Leaderboard screen. It lets users see
+   how they stack up against the entire community.
+   Request URL:
+   GET: {{baseUrl}}/leaderboard/global
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "username": "legend_608",
+   "avatarUrl": null,
+   "totalCleanDays": 118,
+   "longestStreak": 39,
+   "totalXp": 4190,
+   "level": 7,
+   "rank": 1
+   },
+   {
+   "userId": "629d7989-2318-4f1d-be03-ebaee47e6fcc",
+   "username": "recovery_pro",
+   "avatarUrl":
+   "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "totalCleanDays": 0,
+   "longestStreak": 1,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 2
+   },
+   {
+   "userId": "5ee1a5a1-669e-4659-bb5d-a9c198afb4e9",
+   "username": "legend_93",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 3
+   },
+   {
+   "userId": "4f1848bf-90ae-4e5b-8646-698023ed9f9e",
+   "username": "legend_887",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 4
+   },
+   {
+   "userId": "703f45d0-c020-4463-8d2d-7d72bd9f46d9",
+   "username": "legend_299",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 5
+   },
+   {
+   "userId": "5b86de01-4870-47bf-8ec5-0086130e50a6",
+   "username": "legend_120",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 6
+   },
+   {
+   "userId": "7386e51a-ea8d-4f58-861f-a8d13c216467",
+   "username": "tester_1",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 20,
+   "level": 1,
+   "rank": 7
+   },
+   {
+   "userId": "86d2bcc3-f46b-4b30-84ae-c36606de2671",
+   "username": "warrior_three",
+   "avatarUrl":
+   "https://api.dicebear.com/7.x/avataaars/svg?seed=Updated",
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 20,
+   "level": 1,
+   "rank": 8
+   },
+   {
+   "userId": "6d6ea896-86ac-4b97-ae68-135b22ce71dc",
+   "username": "legend_943",
+   "avatarUrl": null,
+   "totalCleanDays": 0,
+   "longestStreak": 0,
+   "totalXp": 0,
+   "level": 1,
+   "rank": 9
+   }
+   ]
+   Content & Suggestions
+   Withdrawal Info
+    Definition: Fetches habit-specific medical/psychological info for a specific day clean.
+    UI Use Case: Used to show "What's happening in your body right now" cards on the
+   habit detail page. It provides science-backed motivation.
+   Request URL:
+   GET: {{baseUrl}}/content/withdrawal?habitId={{habitId}}&dayOffset=3
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "73ac709d-9dce-4ee3-bf45-f231b845d80c",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 3,
+   "message": "Peak Nicotine Withdrawal. Your brain is begging for a fix—
+   don't give in. It lasts only 3-5 minutes.",
+   "tone": "empathetic",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   }
+   Dopamine Suggestions (Params)
+    Definition: Provides healthy alternatives for dopamine stimulation (Breathing, Exercise,
+   Cold Showers).
+    UI Use Case: Used in the "Emergency / Craving" tool. When a user feels a craving, the
+   UI presents these "Dopamine Resets" to help them through the moment.
+   Request URL:
+   GET: {{baseUrl}}/content/dopamine?habits=smoking,drinking
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "d7980bba-614c-43db-ae25-98dbfb362efe",
+   "suggestion": "Practice 4-7-8 breathing: In for 4, hold for 7, exhale
+   for 8. Repeat 4 times.",
+   "category": "mindfulness",
+   "habitSlugs": [
+   "smoking",
+   "vaping",
+   "social_media"
+   ],
+   "difficulty": "easy",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   },
+   {
+   "id": "691c8b0c-de5d-4776-bc54-6df16c026f7b",
+   "suggestion": "Listen to one high-energy song and dance like nobody
+   is watching.",
+   "category": "creative",
+   "habitSlugs": [
+   "drinking",
+   "smoking"
+   ],
+   "difficulty": "easy",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   },
+   {
+   "id": "3f1e14c2-971b-4af8-bb65-e67e10ffb2a6",
+   "suggestion": "Eat a small piece of 85%+ dark chocolate. It triggers
+   endorphins without the sugar crash.",
+   "category": "physical",
+   "habitSlugs": [
+   "sugar_junk_food",
+   "drinking"
+   ],
+   "difficulty": "easy",
+   "createdAt": "2026-04-26T09:08:04.105017Z"
+   }
+   ]
+   Money Spending Suggestion
+    Definition: Maps a saved amount to a culturally relevant purchase (e.g., "You've saved
+   enough for a road trip!").
+    UI Use Case: Used on the Dashboard to make abstract savings feel "real" and
+   rewarding.
+   Request URL:
+   GET: {{baseUrl}}/content/money?country=IN&amount=1000
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "id": "cc7d522c-2fa3-4251-9653-528afec17721",
+   "countryCode": "IN",
+   "amountMin": 501.00,
+   "amountMax": 1500.00,
+   "suggestion": "A movie ticket with popcorn for you and a friend.",
+   "category": "Entertainment",
+   "createdAt": "2026-04-28T13:27:09.439391Z"
+   }
+   Health Milestones
+    Definition: Lists scientific health improvements (e.g., "Lung cilia regenerating") for a
+   specific duration.
+    UI Use Case: Populates the Health Timeline view. It’s a powerful visual of the physical
+   benefits of quitting.
+   Request URL:
+   GET: {{baseUrl}}/content/health-milestones?habitId={{habitId}}&dayOffset=30
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "6c4ead6d-f334-413f-aa33-a983b2a42b32",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 1,
+   "title": "CO Levels Normal",
+   "description": "Carbon monoxide levels in your blood have dropped to
+   normal.",
+   "icon": null,
+   "sourceNote": null,
+   "createdAt": "2026-04-28T13:38:20.302756Z"
+   },
+   {
+   "id": "3e556865-05ee-42ca-ba2f-f9a76444e625",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 2,
+   "title": "Nerve Endings Regrow",
+   "description": "Your ability to smell and taste is enhanced as nerve
+   endings start to regrow.",
+   "icon": null,
+   "sourceNote": null,
+   "createdAt": "2026-04-28T13:38:20.302756Z"
+   },
+   {
+   "id": "31e9e2f6-e1ac-4ff0-b3bd-abeaf0abb737",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 3,
+   "title": "Breathing Easier",
+   "description": "Your bronchial tubes have started to relax, making
+   breathing easier and increasing energy levels.",
+   "icon": null,
+   "sourceNote": null,
+   "createdAt": "2026-04-28T13:38:20.302756Z"
+   },
+   {
+   "id": "f18e9a90-e50e-4908-92aa-3fdf8d822267",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 14,
+   "title": "Circulation Improving",
+   "description": "Blood flow to your hands and feet has improved
+   significantly. Your lungs are starting to clear out mucus.",
+   "icon": null,
+   "sourceNote": null,
+   "createdAt": "2026-04-28T13:38:20.302756Z"
+   },
+   {
+   "id": "f2a94824-992a-46d5-b227-91e28915d9b6",
+   "habitId": "9bb35ea9-fcfe-4440-9b6b-3d664f3fcdf0",
+   "dayOffset": 30,
+   "title": "Lungs Regenerating",
+   "description": "Cilia (tiny hair-like structures) in your lungs have
+   started to regrow, helping to clean the lungs and reduce infection risk.",
+   "icon": null,
+   "sourceNote": null,
+   "createdAt": "2026-04-28T13:38:20.302756Z"
+   }
+   ]
+   Notifications & Push
+   Get Notifications
+    Definition: Retrieves in-app notifications (Badge alerts, Friend requests, Streak
+   milestones).
+    UI Use Case: Populates the Notification Drawer (Bell icon). It keeps the user informed
+   about social and gamification events.
+   Request URL:
+   GET: {{baseUrl}}/notifications?onlyUnread=false
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   [
+   {
+   "id": "84a372ba-26aa-4951-80b9-3abc5ed48c3f",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the '30-Day Legend' badge. Keep it up!",
+   "data": "{\"badgeId\": \"85e1ebcf-baa2-4949-b5fd-f632adada74e\",
+   \"badgeName\": \"30-Day Legend\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:44:06.415062Z"
+   },
+   {
+   "id": "1b0e0bb3-c89b-486e-99fc-6a58eb69c506",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "MILESTONE",
+   "title": "Achievement Unlocked! 🎉",
+   "body": "You hit 30 days! Incredible work.",
+   "data": "{\"streak\": 30, \"userHabitId\": \"d9b35c66-5869-4372-b85f36115bf74bd6\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:44:06.415062Z"
+   },
+   {
+   "id": "7cc86312-db5f-43b2-a43e-ca5f747442d0",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'First Week Warrior' badge. Keep it up!",
+   "data": "{\"badgeId\": \"b6412a25-4375-4035-91d7-16858a537b10\",
+   \"badgeName\": \"First Week Warrior\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "093e24b0-9e23-4870-9e7d-1139a8e5d8ae",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'Day One' badge. Keep it up!",
+   "data": "{\"badgeId\": \"7105b5ed-3aad-444f-a121-59a0766c505c\",
+   \"badgeName\": \"Day One\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "56bf70bf-0824-4cf5-ae69-a9967014516b",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'Two Week Titan' badge. Keep it up!",
+   "data": "{\"badgeId\": \"ddd06ea6-9e4a-4443-b4bf-25574ccf3928\",
+   \"badgeName\": \"Two Week Titan\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:43:59.814815Z"
+   },
+   {
+   "id": "5f392dde-3de5-49a3-9f53-b375381976d8",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'Smart Money' badge. Keep it up!",
+   "data": "{\"badgeId\": \"a5b54b05-d33d-4dc6-afc5-76feb9b61000\",
+   \"badgeName\": \"Smart Money\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:39:52.934767Z"
+   },
+   {
+   "id": "df418182-0ed4-4ff2-a52b-65102d24232d",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'Rising Again' badge. Keep it up!",
+   "data": "{\"badgeId\": \"44cd14d6-451a-4612-a845-868693b5f472\",
+   \"badgeName\": \"Rising Again\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:36:30.094667Z"
+   },
+   {
+   "id": "b5970ac7-5595-4473-b5a5-b0975d5caa44",
+   "userId": "f832b956-832e-4acc-9ec7-a5911348b44b",
+   "type": "BADGE_EARNED",
+   "title": "New Badge Earned! 🏅",
+   "body": "You've earned the 'Saver' badge. Keep it up!",
+   "data": "{\"badgeId\": \"d005ab4a-5629-4611-bb69-8e0ca011aaf0\",
+   \"badgeName\": \"Saver\"}",
+   "isRead": false,
+   "pushSent": true,
+   "emailSent": false,
+   "createdAt": "2026-04-26T09:34:43.614893Z"
+   }
+   ]
+   Mark as Read
+    Definition: Clears notification badges by marking them as viewed.
+    UI Use Case: Triggered when the user opens the notification drawer or clicks a specific
+   item..
+   Request URL:
+   PUT: {{baseUrl}}/notifications/{{notificationId}}/read
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Notification 'New Friend Request' marked as read",
+   "type": "friend_request"
+   }
+   Mark All as Read
+    Definition: Instantly updates all unread notifications for the user to a "read" status in one
+   operation. It returns the total count of notifications that were updated.
+    UI Use Case: This is the logic behind the "Clear All" button inside the Notification
+   Center drawer.
+   o UX Polish: When the user clicks this, the UI immediately clears all "new item"
+   badges (red dots) and resets the unread count in the app header to zero without the
+   user having to click every single alert individually.
+   Request URL:
+   PUT: {{baseUrl}}/notifications/read-all
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Successfully marked 14 notifications as read",
+   "count": 14
+   }
+   or
+   {
+   "message": "No unread notifications to mark",
+   "count": 0
+   }
+   Get VAPID Public Key
+    Definition: Provides the server's public key needed to initialize the browser's Push API.
+    UI Use Case: Used in the Settings/Onboarding when the user clicks "Enable
+   Notifications". The UI uses this key to register the Service Worker.
+   Request URL:
+   GET: {{baseUrl}}/push/vapid-public-key
+   Payload:
+   None
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "publicKey": "BOYBizT3-
+   5U22nJyLQEDuFXN9YpsnJz2uFAMJP9Quwu451Qt4GjcfWlgABvno78UiXkr_aMw68rkiC8Ih08S67
+   s"
+   }
+   VAPID (Voluntary Application Server Identification) keys are basically a
+   "Digital ID Card" for your backend server.
+   When you want to send a push notification to a user's browser (Chrome, Safari, etc.), the browser
+   needs to know that the notification is coming from your specific server and not a random hacker
+   or spammer.
+   Here is how the two keys work together:
+5. The Public Key (The "Handshake")
+    This key is safe to share with the world.
+    Your frontend (the browser) uses this key when asking the user for permission: "Do you
+   want to receive notifications?"
+    The browser registers this key so it knows to only listen for messages signed by your
+   corresponding private key.
+6. The Private Key (The "Signature")
+    Keep this secret! Never share it.
+    Every time your backend wants to send a notification (like a "Daily Reminder" or "New
+   Badge Earned"), it uses this private key to "sign" the message.
+    The Push Service (Google or Apple) checks the signature using your Public Key to verify
+   it's really you.
+   Why do we need it?
+   Without VAPID, push services wouldn't know who is sending what. It prevents:
+7. Spam: Only you can send messages to your subscribers.
+8. Privacy issues: It creates a secure, encrypted link between your server and the user's
+   device.
+   In short: It’s the "Password" that authorizes your backend to talk to your users' browsers.
+   Subscribe to Push (Enable Push Notification)
+    Definition: Saves the browser's unique push endpoint and encryption keys to the
+   backend.
+    UI Use Case: The final step of the "Enable Push" flow. Once this is called, the backend
+   can send real-time alerts to the user's device.
+   Request URL:
+   GET: {{baseUrl}}/push/vapid-public-key
+   Payload:
+   {
+   "endpoint": "https://fcm.googleapis.com/fcm/send/example-endpoint-id-123",
+   "p256dh":
+   "BLm5L8nO5vQ_pGq7Y7z7vYm9J6L5nO5vQ_pGq7Y7z7vYm9J6L5nO5vQ_pGq7Y7z7vY",
+   "auth": "m5L8nO5vQ_pGq7Y7z7vY"
+   }
+   Authorization: Bearer token from Login API response
+   Response
+   {
+   "message": "Notifications enabled! This is a great step to stay committed—
+   we've got your back on this journey."
+   }
+   This is what enables the notifications, and here is how it behaves on mobile and
+   in the background:
+9. Does it work on phones?
+   Yes.
+    Android: Works perfectly in Chrome, Edge, and other browsers.
+    iOS (iPhone): It works, but with one condition: the user must "Add to Home Screen"
+   your web app first. Once it's an icon on their home screen, it behaves just like a native
+   app and can receive push notifications.
+10. Does it work when the browser is closed?
+    Yes. This is the "magic" of Web Push. It uses something called a Service Worker—a tiny script
+    that lives in the browser's background even after you close the tab or the app.
+     When your backend sends a notification, the browser (or the phone's OS) wakes up that
+    Service Worker.
+     The Service Worker then displays the notification popup to the user.
+    Summary of the Flow:
+11. Tab Open: User subscribes.
+12. Tab Closed: User goes about their day.
+13. Backend Event: Your server sends a "New Challenge!" message.
+14. OS/Browser: Receives the message, finds the Service Worker, and pops up the alert on
+    the user's lock screen.
+    This allows your web app to "feel" like a native Android or iOS app without the user having to
+    download it from an App Store.
+    How Payload is Constructed:
+    Here’s the simple confirmation of what you said:
+15. Every Browser has its own Push API: When you call subscribe() in your code, the
+    browser (Chrome, Safari, etc.) actually reaches out to its own respective Push Service
+    (Google's FCM for Chrome, Apple's APNs for Safari) to create a unique "mailbox" for
+    that specific user.
+16. The Browser Generates the Details: The browser then returns that Endpoint (the
+    mailbox address), the p256dh (the encryption key), and the Auth (the secret handshake)
+    back to your UI.
+17. Your UI Sends it to Your Backend: Your UI code doesn't create these values; it just
+    collects them from the browser and sends them to your {{baseUrl}}/push/subscribe
+    API so your backend knows how to "address" notifications to that user in the future.
+    It's essentially the browser doing the heavy lifting of talking to Google/Apple, and your UI just
+    acting as the middleman to pass that "address" to your database!
+    UnSubscribe to Push (Disable Push Notification)
+     Definition: Disables push notifications and returns a final empathetic message.
+     UI Use Case: Used in Settings. The backend returns a motivational message (e.g., "45
+    days clean is huge!") to remind the user of their progress even as they turn off
+    notifications.
+    Request URL:
+    DELETE:
+    {{baseUrl}}/push/unsubscribe?endpoint=https://fcm.googleapis.com/fcm/send/exa
+    mple-endpoint-id-123
+    Payload:
+    None
+    Authorization: Bearer token from Login API response
+    Response
+    //when days<30
+    {
+    "message": "Unsubscribed. You're still early in your journey (2 days
+    clean). We recommend staying connected for another few weeks for maximum
+    support!"
+    }
+    //when days<90
+    {
+    "message": "Unsubscribed. 45 days clean is a huge achievement! Stay
+    vigilant—you've got this, and we're proud of how far you've come."
+    }
+    //when days>90
+    {
+    "message": "Unsubscribed. 120 days clean! We trust that you've built the
+    strength to stay safe and healthy now. We're so happy to have helped you on
+    this path."
+    }
+    Payments & Status
+    Create Checkout Session
+     Definition: Used before a user has a subscription. It creates a temporary session for a
+    new purchase and returns a URL to a Stripe-hosted payment page where the user enters
+    their credit card details for the first time.
+     UI Use Case: Triggered when a "Free" user clicks the "Upgrade to Sovereign" or "Buy
+    Premium" button. The UI calls this API and then immediately redirects the browser to
+    the returned url. After the user pays, Stripe sends them back to your successUrl.
+    Request URL:
+    POST: {{baseUrl}}/payments/checkout
+    Payload:
+    {
+    "successUrl": "http://localhost:3000/success",
+    "cancelUrl": "http://localhost:3000/cancel"
+    }
+    Authorization: Bearer token from Login API response
+    Response
+    {
+    "url":
+    "https://checkout.stripe.com/c/pay/cs_test_a1aZMQrJKbGyslnX5hKkaUlnsmLmcCMmKa
+    RSpVVCLkghpuw1meg1vJ2nPq#fidnandhYHdWcXxpYCc%2FJ2FgY2RwaXEnKSdicGRmZGhqaWBTZH
+    dsZGtxJz8nZmprcXdqaScpJ2R1bE5gfCc%2FJ3VuWnFgdnFaMDRWQU93MkJnbmxOYkcwQnMxfGNJP
+    Dc0XzBXX0hXTGpcQWJqMEJHMnIwaVNidHRGcj01XUhqMjJuYUFqRFJQfG93MmRQQlduNlZJdzZJVH
+    1dXFJRTmtWdGY1NWtKPVNDfE1RJyknY3dqaFZgd3Ngdyc%2FcXdwYCknZ2RmbmJ3anBrYUZqaWp3J
+    z8nJmNjY2NjYycpJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3di
+    c%2FcXdwYHgl"
+    }
+    Create Billing Portal
+     Definition: Used after a user is already a subscriber. It returns a URL to the "Stripe
+    Customer Portal," which is a secure management dashboard where the user can see their
+    billing history, update their credit card, or cancel their subscription.
+     UI Use Case: Triggered when an "Active" premium user clicks "Manage Subscription"
+    or "Billing Settings" in their profile. Since they've already paid in the past, they don't
+    need a "Checkout" page; they need a "Management" page. The UI calls this API and
+    redirects the user to manage their existing plan.
+    Request URL:
+    POST: {{baseUrl}}/payments/portal
+    Payload:
+    {
+    "returnUrl": "http://localhost:3000/settings"
+    }
+    Authorization: Bearer token from Login API response
+    Response
+    {
+    "url":
+    "https://billing.stripe.com/p/session/test_YWNjdF8xU0RKcjdHYmtpS2dCNUd2LF9VUT
+    NHTnZkTnIzbktnajJEUXdvZWh5YXI5TTJQNk1X0100VWHc0wDM"
+    }
+    Get Subscription Status
+     Definition: Returns the user's current payment tier (free or premium) and subscription
+    status (active, inactive).
+     UI Use Case: Critical for Feature Gating. The UI checks this to decide whether to show
+    the "Upgrade" button or unlock "Unlimited Habits" and "Advanced Analytics."
+    Request URL:
+    GET: {{baseUrl}}/payments/status
+    Payload:
+    {
+    "returnUrl": "http://localhost:3000/settings"
+    }
+    Authorization: Bearer token from Login API response
+    Response
+    {
+    "status": "inactive",
+    "tier": "free"
+    }
+    or
+    {
+    "status": "active",
+    "tier": "premium"
+    }
