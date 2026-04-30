@@ -53,7 +53,7 @@ function WhiskeyGlass({ pos, spd }: { pos: [number,number,number]; spd: number }
       {/* Whiskey liquid */}
       <mesh position={[0, -0.06, 0]}>
         <cylinderGeometry args={[0.19, 0.19, 0.22, 16]} />
-        <meshStandardMaterial color="#C48520" roughness={0.2} metalness={0.15} emissive="#331100" emissiveIntensity={0.3} transparent opacity={0.7} />
+        <meshStandardMaterial color="#D48D1D" roughness={0.15} metalness={0.2} emissive="#441100" emissiveIntensity={0.4} transparent opacity={0.75} />
       </mesh>
       {/* Ice cubes */}
       {[0, 1, 2].map((i) => (
@@ -72,10 +72,10 @@ function WhiskeyGlass({ pos, spd }: { pos: [number,number,number]; spd: number }
       {/* Spilling drops */}
       <points ref={dropsRef} position={[0.2, 0.15, 0]}>
         <bufferGeometry><bufferAttribute attach="attributes-position" count={20} array={dropPos} itemSize={3} /></bufferGeometry>
-        <pointsMaterial size={0.015} color="#D4A040" transparent opacity={0.5} depthWrite={false} />
+        <pointsMaterial size={0.015} color="#D48D1D" transparent opacity={0.5} depthWrite={false} />
       </points>
       {/* Warm glow from whiskey */}
-      <pointLight position={[0, -0.06, 0]} intensity={0.35} color="#FF9922" distance={2.5} />
+      <pointLight position={[0, -0.06, 0]} intensity={0.5} color="#FFCC88" distance={2.5} />
     </group>
   );
 }
@@ -121,12 +121,12 @@ function BeerMug({ pos, spd }: { pos: [number,number,number]; spd: number }) {
       {/* Beer liquid */}
       <mesh position={[0, -0.04, 0]}>
         <cylinderGeometry args={[0.132, 0.128, 0.35, 16]} />
-        <meshStandardMaterial color="#E8A820" roughness={0.22} metalness={0.1} emissive="#221100" emissiveIntensity={0.2} transparent opacity={0.68} />
+        <meshStandardMaterial color="#F2B134" roughness={0.15} metalness={0.1} emissive="#221100" emissiveIntensity={0.25} transparent opacity={0.7} />
       </mesh>
       {/* Foam head */}
       <mesh ref={foamRef} position={[0, 0.29, 0]}>
         <cylinderGeometry args={[0.135, 0.135, 0.08, 16]} />
-        <meshStandardMaterial color="#FFF8E8" roughness={0.6} transparent opacity={0.75} />
+        <meshStandardMaterial color="#FFFBF0" roughness={0.5} transparent opacity={0.8} />
       </mesh>
       {/* Mug rim */}
       <mesh position={[0, 0.28, 0]}>
@@ -143,7 +143,7 @@ function BeerMug({ pos, spd }: { pos: [number,number,number]; spd: number }) {
       {/* Spilling beer drops */}
       <points ref={spillRef} position={[0.17, 0.25, 0]}>
         <bufferGeometry><bufferAttribute attach="attributes-position" count={25} array={spillPos} itemSize={3} /></bufferGeometry>
-        <pointsMaterial size={0.018} color="#E8A020" transparent opacity={0.45} depthWrite={false} />
+        <pointsMaterial size={0.018} color="#F2B134" transparent opacity={0.5} depthWrite={false} />
       </points>
     </group>
   );
@@ -210,38 +210,49 @@ function TissueBox({ pos, spd }: { pos: [number,number,number]; spd: number }) {
 /* ── INTIMATE SILHOUETTE (adult content representation) ── */
 function Silhouette({ pos, spd }: { pos: [number,number,number]; spd: number }) {
   const ref = useRef<THREE.Group>(null);
-  const skinMat = <meshStandardMaterial color="#2A150A" roughness={0.85} />;
+  
+  // Custom lathe profile for a fluid, continuous torso (y-points, radius-points)
+  const torsoGeom = useMemo(() => {
+    const points = [];
+    for (let i = 0; i <= 10; i++) {
+      const y = (i / 10) * 0.7;
+      // Define a curve: wider at hips (0), narrow at waist (0.4), wider at bust (0.8)
+      const r = 0.08 + Math.pow(y - 0.35, 2) * 0.4 + (y > 0.5 ? Math.sin((y-0.5)*5)*0.03 : 0);
+      points.push(new THREE.Vector2(r, y));
+    }
+    return new THREE.LatheGeometry(points, 20);
+  }, []);
+
+  const obsidianMat = <meshStandardMaterial color="#050307" roughness={0.05} metalness={0.9} emissive="#110022" emissiveIntensity={0.2} />;
 
   useFrame((_s, delta) => {
     if (!ref.current) return;
     const t = _s.clock.elapsedTime;
     ref.current.position.x += delta * spd * 0.05;
     ref.current.position.y += Math.sin(t * 0.4 + pos[0]) * delta * 0.18;
+    ref.current.rotation.y += delta * 0.2;
   });
 
   return (
     <group ref={ref} position={pos}>
-      {/* Head */}
-      <mesh position={[0, 1.0, 0]}><sphereGeometry args={[0.08, 10, 10]} />{skinMat}</mesh>
-      {/* Hair */}
-      <mesh position={[0, 1.06, -0.02]}><sphereGeometry args={[0.09, 8, 6, 0, Math.PI*2, 0, Math.PI/2.2]} /><meshStandardMaterial color="#0A0000" roughness={0.95} /></mesh>
-      {/* Neck */}
-      <mesh position={[0, 0.87, 0]}><cylinderGeometry args={[0.025, 0.03, 0.07, 6]} />{skinMat}</mesh>
-      {/* Shoulders */}
-      <mesh position={[0, 0.74, 0]}><sphereGeometry args={[0.13, 10, 6, 0, Math.PI*2, 0, Math.PI/1.8]} />{skinMat}</mesh>
-      {/* Bust */}
-      <mesh position={[-0.05, 0.62, 0.07]}><sphereGeometry args={[0.065, 7, 7]} />{skinMat}</mesh>
-      <mesh position={[0.05, 0.62, 0.07]}><sphereGeometry args={[0.065, 7, 7]} />{skinMat}</mesh>
-      {/* Waist */}
-      <mesh position={[0, 0.42, 0]}><cylinderGeometry args={[0.05, 0.08, 0.3, 8]} />{skinMat}</mesh>
-      {/* Hips */}
-      <mesh position={[0, 0.18, 0]}><sphereGeometry args={[0.1, 8, 6, 0, Math.PI*2, Math.PI/5, Math.PI/2.2]} />{skinMat}</mesh>
-      {/* Thighs */}
-      <mesh position={[-0.03, -0.08, 0]}><cylinderGeometry args={[0.04, 0.045, 0.45, 6]} />{skinMat}</mesh>
-      <mesh position={[0.03, -0.08, 0]}><cylinderGeometry args={[0.04, 0.045, 0.45, 6]} />{skinMat}</mesh>
-      {/* Warm intimate glow */}
-      <pointLight position={[0, 0.55, 0.6]} intensity={0.4} color="#FF3366" distance={2.5} />
-      <pointLight position={[0, 0.55, -0.3]} intensity={0.15} color="#FF6688" distance={1.5} />
+      {/* Torso */}
+      <mesh geometry={torsoGeom} position={[0, 0.2, 0]}>{obsidianMat}</mesh>
+      
+      {/* Head & Neck */}
+      <mesh position={[0, 0.96, 0]}><sphereGeometry args={[0.07, 16, 16]} />{obsidianMat}</mesh>
+      <mesh position={[0, 0.88, 0]}><cylinderGeometry args={[0.02, 0.025, 0.1, 8]} />{obsidianMat}</mesh>
+      
+      {/* Legs (Smooth joined) */}
+      <mesh position={[-0.06, 0.05, 0]} rotation={[0.1, 0, 0.05]}><capsuleGeometry args={[0.05, 0.4, 4, 12]} />{obsidianMat}</mesh>
+      <mesh position={[0.06, 0.05, 0]} rotation={[0.1, 0, -0.05]}><capsuleGeometry args={[0.05, 0.4, 4, 12]} />{obsidianMat}</mesh>
+      
+      {/* Arms (Elegant pose) */}
+      <mesh position={[-0.14, 0.65, 0.05]} rotation={[0.5, 0, 0.3]}><capsuleGeometry args={[0.025, 0.35, 4, 10]} />{obsidianMat}</mesh>
+      <mesh position={[0.14, 0.65, 0.05]} rotation={[0.5, 0, -0.3]}><capsuleGeometry args={[0.025, 0.35, 4, 10]} />{obsidianMat}</mesh>
+
+      {/* Dramatic Rim Lighting (Backlights the silhouette) */}
+      <pointLight position={[0, 0.5, -0.5]} intensity={1.8} color="#FF33AA" distance={3} />
+      <pointLight position={[0.3, 0.8, -0.3]} intensity={1.0} color="#4488FF" distance={2} />
     </group>
   );
 }
@@ -268,11 +279,11 @@ function Cigarette({ pos, spd }: { pos: [number,number,number]; spd: number }) {
 
   return (
     <group ref={ref} position={pos}>
-      <mesh position={[0, 0.48, 0]}><cylinderGeometry args={[0.032, 0.032, 0.28, 14]} /><meshStandardMaterial color="#C4A060" roughness={0.65} /></mesh>
-      <mesh position={[0, -0.06, 0]}><cylinderGeometry args={[0.032, 0.032, 0.55, 14]} /><meshStandardMaterial color="#FAFAF6" roughness={0.45} /></mesh>
-      <mesh ref={eRef} position={[0, -0.38, 0]}><sphereGeometry args={[0.025, 10, 10]} /><meshStandardMaterial color="#FF4400" emissive="#FF3300" emissiveIntensity={3.5} roughness={0.1} /></mesh>
-      <points ref={smokeRef} position={[0, -0.4, 0.02]}><bufferGeometry><bufferAttribute attach="attributes-position" count={50} array={smokePos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.016} color="#999" transparent opacity={0.2} depthWrite={false} blending={THREE.NormalBlending} /></points>
-      <pointLight position={[0, -0.38, 0]} intensity={0.3} color="#FF5500" distance={2} />
+      <mesh position={[0, -0.425, 0]}><cylinderGeometry args={[0.032, 0.032, 0.25, 14]} /><meshStandardMaterial color="#C4A060" roughness={0.65} /></mesh>
+      <mesh position={[0, 0, 0]}><cylinderGeometry args={[0.032, 0.032, 0.6, 14]} /><meshStandardMaterial color="#FAFAF6" roughness={0.4} /></mesh>
+      <mesh ref={eRef} position={[0, 0.3, 0]}><sphereGeometry args={[0.025, 10, 10]} /><meshStandardMaterial color="#FF4400" emissive="#FFCC00" emissiveIntensity={3.5} roughness={0.1} /></mesh>
+      <points ref={smokeRef} position={[0, 0.3, 0.02]}><bufferGeometry><bufferAttribute attach="attributes-position" count={50} array={smokePos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.016} color="#AAA" transparent opacity={0.15} depthWrite={false} blending={THREE.NormalBlending} /></points>
+      <pointLight position={[0, 0.3, 0]} intensity={0.4} color="#FF7700" distance={2} />
     </group>
   );
 }
@@ -310,14 +321,14 @@ function CannabisLeaf({ pos, spd }: { pos: [number,number,number]; spd: number }
       <mesh scale={[0.35, 0.35, 0.35]}>
         <LeafGeom />
         <meshStandardMaterial
-          color={lit ? "#C16620" : "#2E7D32"}
-          roughness={lit ? 0.5 : 0.4}
+          color={lit ? "#D48D1D" : "#2E7D32"}
+          roughness={lit ? 0.3 : 0.4}
           side={THREE.DoubleSide}
-          emissive={lit ? "#331100" : "#0A1A0A"}
-          emissiveIntensity={lit ? 0.6 : 0.2}
+          emissive={lit ? "#442200" : "#0A1A0A"}
+          emissiveIntensity={lit ? 0.8 : 0.2}
         />
       </mesh>
-      {lit && <pointLight position={[0, -0.05, 0.05]} intensity={0.15} color="#FF6600" distance={1.5} />}
+      {lit && <pointLight position={[0, -0.05, 0.05]} intensity={0.25} color="#FFCC88" distance={1.5} />}
     </group>
   );
 }
@@ -359,7 +370,7 @@ function Device({ pos, spd, type }: { pos: [number,number,number]; spd: number; 
       {/* Screen */}
       <mesh ref={screenRef} position={[0, 0, 0.017]}>
         <planeGeometry args={[dims[0], dims[1]]} />
-        <meshStandardMaterial color="#0A0A1A" roughness={0.05} metalness={0.5} emissive="#3355CC" emissiveIntensity={0.35} />
+        <meshStandardMaterial color="#0A0A1A" roughness={0.05} metalness={0.5} emissive="#3366FF" emissiveIntensity={0.5} />
       </mesh>
       {/* Cracks */}
       {cracks.map((c, i) => (
@@ -369,7 +380,7 @@ function Device({ pos, spd, type }: { pos: [number,number,number]; spd: number; 
         </mesh>
       ))}
       {/* Screen glow light — illuminates nearby objects */}
-      <pointLight ref={lightRef} position={[0, 0, 0.2]} intensity={0.25} color="#4466CC" distance={2.5} />
+      <pointLight ref={lightRef} position={[0, 0, 0.2]} intensity={0.35} color="#3366FF" distance={2.5} />
     </group>
   );
 }
@@ -404,7 +415,7 @@ function Dust() {
     for (let i=0;i<c;i++) { a[i*3+1] += d*0.04; if (a[i*3+1] > 6) a[i*3+1] = -6; }
     ref.current.geometry.attributes.position.needsUpdate = true;
   });
-  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" count={c} array={pos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.012} color="#DDBB66" transparent opacity={0.25} blending={THREE.AdditiveBlending} depthWrite={false} /></points>;
+  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" count={c} array={pos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.012} color="#FFF5E1" transparent opacity={0.2} blending={THREE.AdditiveBlending} depthWrite={false} /></points>;
 }
 
 /* ── SCENE ── */
@@ -414,10 +425,10 @@ const deviceTypes: ("phone"|"tablet"|"laptop")[] = ["phone","phone","phone","pho
 function SceneContent() {
   return (
     <>
-      <directionalLight position={[5, 4, 3]} intensity={0.9} color="#FFF5E8" />
-      <directionalLight position={[-4, 1, -2]} intensity={0.4} color="#CCDDFF" />
-      <directionalLight position={[0, -1, -4]} intensity={0.3} color="#FFCCAA" />
-      <ambientLight intensity={0.55} color="#334466" />
+      <directionalLight position={[5, 4, 3]} intensity={1.2} color="#FFCC88" />
+      <directionalLight position={[-4, 1, -2]} intensity={0.8} color="#4488FF" />
+      <directionalLight position={[0, -1, -4]} intensity={0.4} color="#FFCCAA" />
+      <ambientLight intensity={0.25} color="#0A0A1A" />
 
       {/* 10 cigarettes with ember glow */}
       {[...Array(10)].map((_, i) => <Cigarette key={`c${i}`} pos={rp()} spd={0.3+Math.random()*0.8} />)}
