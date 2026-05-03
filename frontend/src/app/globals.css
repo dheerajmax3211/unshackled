@@ -102,6 +102,31 @@
   --surface-lighter: 86 86 142;
 }
 
+[data-theme="image"] {
+  --brand-amber: 255 170 60;
+  --brand-amber-light: 255 204 136;
+  --brand-amber-dark: 212 141 29;
+  --brand-blue: 68 136 255;
+  --brand-blue-light: 130 180 255;
+  --brand-blue-dark: 30 100 220;
+  --brand-green: 34 211 238;
+  --brand-green-light: 103 232 249;
+  --brand-green-dark: 8 145 178;
+  --brand-rose: 255 85 85;
+  --brand-rose-light: 255 120 120;
+  --brand-rose-dark: 200 40 40;
+  --surface-darkest: 2 4 10;
+  --surface-darker: 8 12 24;
+  --surface-dark: 15 22 40;
+  --surface-mid: 25 35 60;
+  --surface-light: 45 55 85;
+  --surface-lighter: 70 80 110;
+  --text-primary: 248 250 252;
+  --text-secondary: 203 213 225;
+  --text-muted: 148 163 184;
+  --text-subtle: 100 116 139;
+}
+
 [data-theme="dawn"] {
   --brand-amber: 217 119 6;
   --brand-amber-light: 245 158 11;
