@@ -16,6 +16,61 @@ import { GlassCard } from "@/components/shared/GlassCard";
 import { motionVariants } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
+function AnimatedFeatureIcon({ iconName, IconComponent }: { iconName: string, IconComponent: any }) {
+  const getAnimationProps = () => {
+    switch (iconName) {
+      case "Streak Tracking":
+        return {
+          animate: { y: [0, -2, 0, -1, 0], scale: [1, 1.1, 1, 1.05, 1], opacity: [0.8, 1, 0.9, 1, 0.8] },
+          transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+        };
+      case "Money Saved Calculator":
+        return {
+          animate: { y: [0, -3, 0], x: [0, 2, 0] },
+          transition: { duration: 1.5, repeat: Infinity, ease: "linear" }
+        };
+      case "Health Recovery Timeline":
+        return {
+          animate: { scale: [1, 1.2, 1, 1.1, 1] },
+          transition: { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+        };
+      case "Dopamine Substitutions":
+        return {
+          animate: { rotate: [0, -10, 10, -10, 10, 0], scale: [1, 1.2, 1] },
+          transition: { duration: 0.5, repeat: Infinity, repeatDelay: 2, ease: "linear" }
+        };
+      case "Friend Challenges":
+        return {
+          animate: { y: [0, -2, 0] },
+          transition: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+        };
+      case "XP & Badges":
+        return {
+          animate: { rotateY: [0, 180, 360] },
+          transition: { duration: 3, repeat: Infinity, ease: "linear" }
+        };
+      case "Journal & Mood":
+        return {
+          animate: { rotate: [0, 5, -5, 0] },
+          transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+        };
+      case "Withdrawal Empathy":
+        return {
+          animate: { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] },
+          transition: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+        };
+      default:
+        return {};
+    }
+  };
+
+  return (
+    <motion.div {...getAnimationProps()} className="flex items-center justify-center">
+      <IconComponent className="w-5 h-5" strokeWidth={1.5} />
+    </motion.div>
+  );
+}
+
 const features = [
   {
     icon: Flame,
@@ -76,7 +131,7 @@ const iconColors = {
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative py-32 bg-surface-darker">
+    <section id="features" className="relative py-32 bg-surface-darker overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader
           title="Everything you need to succeed"
@@ -86,34 +141,48 @@ export default function FeaturesSection() {
         />
 
         <motion.div
-          variants={motionVariants.staggerChildren}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+          }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-16"
         >
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              variants={motionVariants.scaleIn}
-              custom={i}
+              variants={{
+                hidden: { opacity: 0, y: 30, scale: 0.95 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
             >
               <GlassCard
                 padding="md"
                 className="group h-full"
+                delay={i * 0.05}
+                animated={false}
               >
                 <div className="flex flex-col gap-4">
-                  <div
+                  <motion.div
                     className={cn(
                       "w-10 h-10 rounded-glass-sm flex items-center justify-center transition-all duration-400",
                       iconColors[feature.color]
                     )}
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
                   >
-                    <feature.icon className="w-5 h-5" strokeWidth={1.5} />
-                  </div>
+                    <AnimatedFeatureIcon iconName={feature.title} IconComponent={feature.icon} />
+                  </motion.div>
 
                   <div>
-                    <h3 className="text-heading-sm font-semibold text-text-primary mb-2">
+                    <h3 className="text-heading-sm font-display font-semibold text-text-primary mb-2">
                       {feature.title}
                     </h3>
                     <p className="text-body-sm text-text-muted leading-relaxed">

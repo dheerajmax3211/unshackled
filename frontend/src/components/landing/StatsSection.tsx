@@ -5,7 +5,6 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { GlassCard } from "@/components/shared/GlassCard";
 import { StatCounter } from "@/components/shared/StatCounter";
 import { mockGlobalStats } from "@/lib/mock-data";
-import { motionVariants } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 
 const stats = [
@@ -46,7 +45,7 @@ export default function StatsSection() {
   return (
     <section
       id="stats"
-      className="relative py-32 bg-surface-darkest"
+      className="relative py-32 bg-surface-darkest overflow-hidden"
     >
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader
@@ -57,17 +56,36 @@ export default function StatsSection() {
         />
 
         <motion.div
-          variants={motionVariants.staggerChildren}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
+          }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-16"
         >
-          {stats.map((stat) => (
-            <motion.div key={stat.label} variants={motionVariants.scaleIn}>
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              variants={{
+                hidden: { opacity: 0, y: 30, scale: 0.95 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+            >
               <GlassCard
                 padding="lg"
-                className={cn("text-center", colorBorders[stat.color])}
+                className={cn(
+                  "text-center",
+                  colorBorders[stat.color],
+                  stat.color === "green" && "animate-pulse-glow"
+                )}
+                animated={false}
               >
                 <StatCounter
                   value={stat.value}

@@ -19,6 +19,37 @@ const colorMap = {
   rose: "from-brand-rose-light via-brand-rose to-brand-rose-dark",
 };
 
+/* Word-by-word reveal: each word wraps in overflow-hidden, inner span slides up */
+function WordReveal({ text, delay = 0 }: { text: string; delay?: number }) {
+  const words = text.split(" ");
+  return (
+    <motion.span
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-40px" }}
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.06, delayChildren: delay } },
+      }}
+    >
+      {words.map((word, i) => (
+        <span key={i} className="inline-block overflow-hidden mr-[0.25em]">
+          <motion.span
+            className="inline-block will-change-transform"
+            variants={{
+              hidden: { y: "110%" },
+              visible: { y: "0%" },
+            }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {word}
+          </motion.span>
+        </span>
+      ))}
+    </motion.span>
+  );
+}
+
 export function SectionHeader({
   title,
   subtitle,
@@ -28,11 +59,7 @@ export function SectionHeader({
   badge,
 }: SectionHeaderProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+    <div
       className={cn(
         "flex flex-col gap-4",
         alignment === "center" ? "items-center text-center" : "items-start",
@@ -40,21 +67,35 @@ export function SectionHeader({
       )}
     >
       {badge && (
-        <span className="inline-flex items-center rounded-full border border-brand-amber/20 bg-brand-amber/10 px-3 py-1 text-caption font-medium text-brand-amber-light">
+        <motion.span
+          initial={{ clipPath: "inset(0 100% 0 0)" }}
+          whileInView={{ clipPath: "inset(0 0% 0 0)" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-flex items-center rounded-full border border-brand-amber/20 bg-brand-amber/10 px-3 py-1 text-caption font-medium text-brand-amber-light"
+        >
           {badge}
-        </span>
+        </motion.span>
       )}
       <h2
         className={cn(
-          "text-display-sm md:text-display-md font-bold bg-clip-text text-transparent bg-gradient-to-r",
+          "text-display-sm md:text-display-md font-display font-bold bg-clip-text text-transparent bg-gradient-to-r animate-gradient-drift",
           colorMap[color]
         )}
       >
-        {title}
+        <WordReveal text={title} />
       </h2>
       {subtitle && (
-        <p className="text-body-lg text-text-muted max-w-2xl">{subtitle}</p>
+        <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          className="text-body-lg text-text-muted max-w-2xl"
+        >
+          {subtitle}
+        </motion.p>
       )}
-    </motion.div>
+    </div>
   );
 }

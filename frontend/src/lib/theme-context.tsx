@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 
-export type ThemeName = "amber" | "ocean" | "forest" | "midnight" | "dawn" | "image";
+export type ThemeName = "amber" | "ocean" | "forest" | "midnight" | "dawn";
 
 export const themes: { name: ThemeName; label: string; icon: string }[] = [
   { name: "amber", label: "Amber Fire", icon: "🔥" },
@@ -10,7 +10,6 @@ export const themes: { name: ThemeName; label: string; icon: string }[] = [
   { name: "forest", label: "Forest Heal", icon: "🌿" },
   { name: "midnight", label: "Midnight Sky", icon: "🌙" },
   { name: "dawn", label: "Dawn Light", icon: "☀️" },
-  { name: "image", label: "Cinematic Loop", icon: "🎬" },
 ];
 
 interface ThemeContextValue {
@@ -58,4 +57,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     </ThemeContext.Provider>
   );
 }
-

@@ -27,10 +27,33 @@ export const designTokens = {
     },
   },
   glass: {
-    background: "rgba(15, 23, 42, 0.5)",
-    border: "rgba(255, 255, 255, 0.06)",
-    blur: 24,
-    shadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
+    background: "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.04) 100%)",
+    backdropFilter: "blur(24px) saturate(180%)",
+    border: "1px solid rgba(255,255,255,0.09)",
+    shadow: "0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.2)",
+  },
+  motion: {
+    spring: {
+      default: { tension: 300, friction: 20 },
+      snappy: { tension: 400, friction: 17 },
+      gentle: { tension: 200, friction: 25 },
+      bouncy: { tension: 400, friction: 10 },
+    },
+    ease: {
+      smooth: [0.16, 1, 0.3, 1] as [number, number, number, number],
+      snap: [0.68, -0.55, 0.27, 1.55] as [number, number, number, number],
+    },
+    stagger: {
+      fast: 0.04,
+      default: 0.08,
+      slow: 0.12,
+    },
+    duration: {
+      fast: 0.3,
+      default: 0.5,
+      slow: 0.8,
+      cinematic: 1.2,
+    },
   },
 } as const;
 
@@ -40,7 +63,7 @@ export const motionVariants = {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.6, ease: designTokens.motion.ease.smooth },
     },
   },
   fadeIn: {
@@ -59,7 +82,7 @@ export const motionVariants = {
     visible: {
       opacity: 1,
       scale: 1,
-      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.4, ease: designTokens.motion.ease.smooth },
     },
   },
   slideRight: {
@@ -67,7 +90,21 @@ export const motionVariants = {
     visible: {
       opacity: 1,
       x: 0,
-      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+      transition: { duration: 0.5, ease: designTokens.motion.ease.smooth },
+    },
+  },
+  clipReveal: {
+    hidden: { clipPath: "inset(0 0 100% 0)" },
+    visible: {
+      clipPath: "inset(0 0 0% 0)",
+      transition: { duration: 0.8, ease: designTokens.motion.ease.smooth },
+    },
+  },
+  wordReveal: {
+    hidden: { y: "110%" },
+    visible: {
+      y: "0%",
+      transition: { duration: 0.6, ease: designTokens.motion.ease.smooth },
     },
   },
 };

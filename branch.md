@@ -1,4 +1,12 @@
-### `mvp-v1.2-unstable` [CURRENT]
+### `mvp-v2-stable` [CURRENT]
+- **Purpose**: Fully stabilized, high-fidelity visual and motion overhaul. Production-ready frontend UI.
+- **Key Features**:
+  - Abstract "Void" 3D scene with 10,000 performance-optimized particles and geometric sigils.
+  - Complete motion system (magnetic tilt, cursor-reactive specular highlights, smooth scroll).
+  - Premium Cyberpunk/Recovery aesthetic with 5 distinct themes and polished micro-animations (Habit tracker, calendar, badges).
+- **Note**: The definitive visual baseline for the frontend platform.
+
+### `mvp-v1.2-unstable`
 - **Purpose**: High-fidelity visual update with habit-themed 3D backgrounds and multi-theme support.
 - **Key Features**:
   - Dynamic 3D UI background (Cigarettes, Beer, Pills, Cannabis, Silhouettes, Broken Screens).
@@ -23,7 +31,8 @@
 ---
 
 ## Which branch should I use?
-- If you want the **latest visual features and theme testing**, use `mvp-v1.2-unstable`.
+- If you want the **latest stable production-ready UI**, use `mvp-v2-stable`.
+- If you want the **experimental 3D model testing**, use `mvp-v1.2-unstable`.
 - If you need to **test the UI with themes and backend**, use `mvp-v1.1-unstable`.
 - If you are **developing UI/UX with themes** in isolation, use `frontend-unstable-v1.1`.
 - If you are **modifying backend logic**, use `backend-stable-v1`.

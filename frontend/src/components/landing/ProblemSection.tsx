@@ -51,7 +51,7 @@ const titleGradients = {
 
 export default function ProblemSection() {
   return (
-    <section className="relative py-32 bg-surface-darker">
+    <section className="relative py-32 bg-surface-darker overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader
           title="Addiction isn't a choice. It's a hijacked brain."
@@ -86,7 +86,7 @@ export default function ProblemSection() {
 
                   <h3
                     className={cn(
-                      "text-heading-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r",
+                      "text-heading-lg font-display font-semibold bg-clip-text text-transparent bg-gradient-to-r animate-gradient-drift",
                       titleGradients[problem.color]
                     )}
                   >

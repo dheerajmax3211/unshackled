@@ -1,462 +1,245 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-function rng(s: number) { return (Math.random() - 0.5) * s; }
-function rp(): [number, number, number] { return [rng(14), rng(9), -1 - Math.random() * 5]; }
+/* ═══════════════════════════════════════
+   VOID PARTICLES — 10,000 micro-particles
+   Mouse-reactive with ambient pulse
+   ═══════════════════════════════════════ */
+function VoidParticles({ mouse, isMobile }: { mouse: React.MutableRefObject<[number, number]>; isMobile: boolean }) {
+  const count = isMobile ? 4000 : 10000;
+  const ref = useRef<THREE.Points>(null);
 
-/* ── WHISKEY TUMBLER (rocks glass) ── */
-function WhiskeyGlass({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const dropsRef = useRef<THREE.Points>(null);
-  const dropPos = useMemo(() => { const a = new Float32Array(20*3); for (let i=0;i<20;i++) a[i*3+1] = -Math.random()*0.6; return a; }, []);
-  const tilt = useRef(0);
+  const { positions, basePositions, colors } = useMemo(() => {
+    const pos = new Float32Array(count * 3);
+    const base = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
 
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    const t = _s.clock.elapsedTime;
-    ref.current.position.x += delta * spd * 0.1;
-    ref.current.position.y += Math.sin(t * spd + pos[0]) * delta * 0.25;
-    tilt.current = Math.sin(t * spd * 1.2) * 0.15;
-    ref.current.rotation.z = tilt.current;
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      // Sphere distribution with depth
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 3 + Math.random() * 12;
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = r * Math.sin(phi) * Math.sin(theta);
+      const z = -2 - Math.random() * 18;
 
-    if (dropsRef.current) {
-      const a = dropsRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i=0;i<20;i++) {
-        a[i*3+1] -= delta * 0.15;
-        a[i*3] += (Math.random()-0.5) * delta * 0.03;
-        if (a[i*3+1] < -0.6) a[i*3+1] = 0;
+      pos[i3] = x;
+      pos[i3 + 1] = y;
+      pos[i3 + 2] = z;
+      base[i3] = x;
+      base[i3 + 1] = y;
+      base[i3 + 2] = z;
+
+      // Near-black base with occasional shimmer (~5% particles get color)
+      const shimmer = Math.random();
+      if (shimmer > 0.97) {
+        // Amber shimmer
+        col[i3] = 0.96; col[i3 + 1] = 0.62; col[i3 + 2] = 0.04;
+      } else if (shimmer > 0.94) {
+        // Blue shimmer
+        col[i3] = 0.23; col[i3 + 1] = 0.51; col[i3 + 2] = 0.96;
+      } else {
+        // Soft stardust (brighter for AdditiveBlending on dark themes)
+        const intensity = 0.15 + Math.random() * 0.25;
+        col[i3] = intensity * 0.8; 
+        col[i3 + 1] = intensity * 0.9; 
+        col[i3 + 2] = intensity;
       }
-      dropsRef.current.geometry.attributes.position.needsUpdate = true;
     }
-  });
+    return { positions: pos, basePositions: base, colors: col };
+  }, [count]);
 
-  return (
-    <group ref={ref} position={pos}>
-      {/* Glass body — thick short tumbler */}
-      <mesh>
-        <cylinderGeometry args={[0.22, 0.2, 0.38, 32, 1, true]} />
-        <meshStandardMaterial color="#CCCCBB" roughness={0.06} metalness={0.08} transparent opacity={0.3} />
-      </mesh>
-      {/* Thick glass base */}
-      <mesh position={[0, -0.19, 0]}>
-        <cylinderGeometry args={[0.21, 0.21, 0.06, 32]} />
-        <meshStandardMaterial color="#CCCCBB" roughness={0.06} metalness={0.08} transparent opacity={0.35} />
-      </mesh>
-      {/* Glass rim */}
-      <mesh position={[0, 0.19, 0]}>
-        <torusGeometry args={[0.22, 0.012, 8, 24]} />
-        <meshStandardMaterial color="#DDDDCC" roughness={0.08} metalness={0.1} transparent opacity={0.45} />
-      </mesh>
-      {/* Whiskey liquid */}
-      <mesh position={[0, -0.06, 0]}>
-        <cylinderGeometry args={[0.19, 0.19, 0.22, 16]} />
-        <meshStandardMaterial color="#D48D1D" roughness={0.15} metalness={0.2} emissive="#441100" emissiveIntensity={0.4} transparent opacity={0.75} />
-      </mesh>
-      {/* Ice cubes */}
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[rng(0.12), -0.02 + i*0.04, rng(0.12)]} rotation={[Math.random(), Math.random(), Math.random()]}>
-          <boxGeometry args={[0.06, 0.06, 0.06]} />
-          <meshStandardMaterial color="#DDF8FF" roughness={0.05} metalness={0.1} transparent opacity={0.55} />
-        </mesh>
-      ))}
-      {/* Condensation dots */}
-      {[...Array(15)].map((_, i) => (
-        <mesh key={`c${i}`} position={[Math.cos(i*0.7)*0.2, rng(0.3), Math.sin(i*0.7)*0.2]}>
-          <sphereGeometry args={[0.008 + Math.random()*0.012, 4, 4]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} transparent opacity={0.25} />
-        </mesh>
-      ))}
-      {/* Spilling drops */}
-      <points ref={dropsRef} position={[0.2, 0.15, 0]}>
-        <bufferGeometry><bufferAttribute attach="attributes-position" count={20} array={dropPos} itemSize={3} /></bufferGeometry>
-        <pointsMaterial size={0.015} color="#D48D1D" transparent opacity={0.5} depthWrite={false} />
-      </points>
-      {/* Warm glow from whiskey */}
-      <pointLight position={[0, -0.06, 0]} intensity={0.5} color="#FFCC88" distance={2.5} />
-    </group>
-  );
-}
-
-/* ── BEER MUG with handle ── */
-function BeerMug({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const foamRef = useRef<THREE.Mesh>(null);
-  const spillRef = useRef<THREE.Points>(null);
-  const spillPos = useMemo(() => { const a = new Float32Array(25*3); for (let i=0;i<25;i++) a[i*3+1] = -Math.random()*0.4; return a; }, []);
-
-  useFrame((_s, delta) => {
+  useFrame((state) => {
     if (!ref.current) return;
-    const t = _s.clock.elapsedTime;
-    ref.current.position.x += delta * spd * 0.09;
-    ref.current.position.y += Math.cos(t * spd + pos[0]) * delta * 0.2;
-    ref.current.rotation.z = Math.sin(t * spd * 0.8) * 0.12;
-    if (foamRef.current) foamRef.current.position.y = 0.29 + Math.sin(t * 3) * 0.01;
-    if (spillRef.current) {
-      const a = spillRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i=0;i<25;i++) { a[i*3+1] -= delta * 0.18; a[i*3] += (Math.random()-0.5)*delta*0.04; if (a[i*3+1] < -0.4) a[i*3+1] = 0; }
-      spillRef.current.geometry.attributes.position.needsUpdate = true;
+    const t = state.clock.elapsedTime;
+    const arr = ref.current.geometry.attributes.position.array as Float32Array;
+    const [mx, my] = mouse.current;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+
+      // Ambient drift
+      arr[i3] = basePositions[i3] + Math.sin(t * 0.1 + i * 0.01) * 0.15;
+      arr[i3 + 1] = basePositions[i3 + 1] + Math.cos(t * 0.08 + i * 0.013) * 0.12;
+      arr[i3 + 2] = basePositions[i3 + 2] + Math.sin(t * 0.06 + i * 0.017) * 0.08;
+
+      // Mouse magnetic repulsion (project mouse to world space approx)
+      const dx = arr[i3] - mx * 8;
+      const dy = arr[i3 + 1] - my * 5;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 2.5) {
+        const force = (2.5 - dist) / 2.5 * 0.4;
+        arr[i3] += (dx / dist) * force;
+        arr[i3 + 1] += (dy / dist) * force;
+      }
     }
+
+    ref.current.geometry.attributes.position.needsUpdate = true;
+
+    // Subtle ambient rhythm pulse on material
+    const mat = ref.current.material as THREE.PointsMaterial;
+    mat.opacity = 0.35 + Math.sin(t * 0.5) * 0.1;
   });
 
   return (
-    <group ref={ref} position={pos}>
-      {/* Mug body */}
-      <mesh>
-        <cylinderGeometry args={[0.16, 0.14, 0.55, 24, 1, true]} />
-        <meshStandardMaterial color="#BBBBAA" roughness={0.1} metalness={0.12} transparent opacity={0.32} />
-      </mesh>
-      {/* Mug bottom */}
-      <mesh position={[0, -0.28, 0]}>
-        <cylinderGeometry args={[0.15, 0.15, 0.04, 16]} />
-        <meshStandardMaterial color="#BBBBAA" roughness={0.1} metalness={0.12} transparent opacity={0.35} />
-      </mesh>
-      {/* Handle */}
-      <mesh position={[0.18, 0, 0]}>
-        <torusGeometry args={[0.1, 0.025, 8, 12, Math.PI * 1.2]} rotation={[0, 0, Math.PI / 2]} />
-        <meshStandardMaterial color="#BBBBAA" roughness={0.1} metalness={0.12} transparent opacity={0.35} />
-      </mesh>
-      {/* Beer liquid */}
-      <mesh position={[0, -0.04, 0]}>
-        <cylinderGeometry args={[0.132, 0.128, 0.35, 16]} />
-        <meshStandardMaterial color="#F2B134" roughness={0.15} metalness={0.1} emissive="#221100" emissiveIntensity={0.25} transparent opacity={0.7} />
-      </mesh>
-      {/* Foam head */}
-      <mesh ref={foamRef} position={[0, 0.29, 0]}>
-        <cylinderGeometry args={[0.135, 0.135, 0.08, 16]} />
-        <meshStandardMaterial color="#FFFBF0" roughness={0.5} transparent opacity={0.8} />
-      </mesh>
-      {/* Mug rim */}
-      <mesh position={[0, 0.28, 0]}>
-        <torusGeometry args={[0.16, 0.014, 6, 20]} />
-        <meshStandardMaterial color="#CCCCBB" roughness={0.1} metalness={0.1} transparent opacity={0.45} />
-      </mesh>
-      {/* Condensation */}
-      {[...Array(12)].map((_, i) => (
-        <mesh key={`c${i}`} position={[Math.cos(i)*0.15, rng(0.4), Math.sin(i)*0.15]}>
-          <sphereGeometry args={[0.01, 4, 4]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0.3} transparent opacity={0.2} />
-        </mesh>
-      ))}
-      {/* Spilling beer drops */}
-      <points ref={spillRef} position={[0.17, 0.25, 0]}>
-        <bufferGeometry><bufferAttribute attach="attributes-position" count={25} array={spillPos} itemSize={3} /></bufferGeometry>
-        <pointsMaterial size={0.018} color="#F2B134" transparent opacity={0.5} depthWrite={false} />
-      </points>
-    </group>
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-color" count={count} array={colors} itemSize={3} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.025}
+        vertexColors
+        transparent
+        opacity={0.4}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        sizeAttenuation
+      />
+    </points>
   );
 }
 
-/* ── TISSUE BOX + USED TISSUES ── */
-function TissueBox({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const usedRefs = useRef<(THREE.Mesh | null)[]>([]);
-
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    const t = _s.clock.elapsedTime;
-    ref.current.position.x += delta * spd * 0.06;
-    ref.current.position.y += Math.sin(t * spd + pos[0]) * delta * 0.15;
-    ref.current.rotation.z = Math.sin(t * 0.5) * 0.1;
-    usedRefs.current.forEach((m, i) => {
-      if (!m) return;
-      m.position.y += Math.sin(t * 2 + i) * delta * 0.1;
-      m.rotation.x += delta * 0.2;
-    });
-  });
-
-  return (
-    <group ref={ref} position={pos}>
-      {/* Box body */}
-      <mesh position={[0, 0.1, 0]}>
-        <boxGeometry args={[0.28, 0.22, 0.2]} />
-        <meshStandardMaterial color="#FFEEDD" roughness={0.6} />
-      </mesh>
-      {/* Box pattern lines */}
-      {[0, 1, 2].map((i) => (
-        <mesh key={i} position={[0, 0.16 + i*0.03, 0.102]}>
-          <planeGeometry args={[0.22, 0.008]} />
-          <meshBasicMaterial color="#DDCCBB" transparent opacity={0.3} />
-        </mesh>
-      ))}
-      {/* Oval opening */}
-      <mesh position={[0, 0.22, 0]} rotation={[0, 0, 0]}>
-        <circleGeometry args={[0.06, 16]} />
-        <meshBasicMaterial color="#DDCCBB" transparent opacity={0.5} />
-      </mesh>
-      {/* Tissue pulled out — wavy plane */}
-      <mesh position={[0, 0.25, 0]} rotation={[0.3, 0, 0]}>
-        <planeGeometry args={[0.08, 0.14, 4, 6]} />
-        <meshStandardMaterial color="#FFFFFF" roughness={0.7} side={THREE.DoubleSide} />
-      </mesh>
-      {/* Scrunched up used tissues */}
-      {[...Array(4)].map((_, i) => (
-        <mesh
-          key={`u${i}`}
-          ref={(el) => { usedRefs.current[i] = el; }}
-          position={[rng(0.4), -0.15 - i*0.15, rng(0.3)]}
-          rotation={[Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI]}
-        >
-          <sphereGeometry args={[0.04 + Math.random()*0.04, 8, 6]} />
-          <meshStandardMaterial color="#FFF8F0" roughness={0.8} />
-        </mesh>
-      ))}
-    </group>
-  );
+/* ═══════════════════════════════════════
+   ABSTRACT SIGILS — wireframe geometric forms
+   Represent vices abstractly, not literally
+   ═══════════════════════════════════════ */
+interface SigilProps {
+  position: [number, number, number];
+  geometry: "icosahedron" | "torus" | "torusKnot" | "octahedron" | "dodecahedron";
+  rotationSpeed: [number, number, number];
+  scale: number;
 }
 
-/* ── INTIMATE SILHOUETTE (adult content representation) ── */
-function Silhouette({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  
-  // Custom lathe profile for a fluid, continuous torso (y-points, radius-points)
-  const torsoGeom = useMemo(() => {
-    const points = [];
-    for (let i = 0; i <= 10; i++) {
-      const y = (i / 10) * 0.7;
-      // Define a curve: wider at hips (0), narrow at waist (0.4), wider at bust (0.8)
-      const r = 0.08 + Math.pow(y - 0.35, 2) * 0.4 + (y > 0.5 ? Math.sin((y-0.5)*5)*0.03 : 0);
-      points.push(new THREE.Vector2(r, y));
-    }
-    return new THREE.LatheGeometry(points, 20);
-  }, []);
-
-  const obsidianMat = <meshStandardMaterial color="#050307" roughness={0.05} metalness={0.9} emissive="#110022" emissiveIntensity={0.2} />;
-
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    const t = _s.clock.elapsedTime;
-    ref.current.position.x += delta * spd * 0.05;
-    ref.current.position.y += Math.sin(t * 0.4 + pos[0]) * delta * 0.18;
-    ref.current.rotation.y += delta * 0.2;
-  });
-
-  return (
-    <group ref={ref} position={pos}>
-      {/* Torso */}
-      <mesh geometry={torsoGeom} position={[0, 0.2, 0]}>{obsidianMat}</mesh>
-      
-      {/* Head & Neck */}
-      <mesh position={[0, 0.96, 0]}><sphereGeometry args={[0.07, 16, 16]} />{obsidianMat}</mesh>
-      <mesh position={[0, 0.88, 0]}><cylinderGeometry args={[0.02, 0.025, 0.1, 8]} />{obsidianMat}</mesh>
-      
-      {/* Legs (Smooth joined) */}
-      <mesh position={[-0.06, 0.05, 0]} rotation={[0.1, 0, 0.05]}><capsuleGeometry args={[0.05, 0.4, 4, 12]} />{obsidianMat}</mesh>
-      <mesh position={[0.06, 0.05, 0]} rotation={[0.1, 0, -0.05]}><capsuleGeometry args={[0.05, 0.4, 4, 12]} />{obsidianMat}</mesh>
-      
-      {/* Arms (Elegant pose) */}
-      <mesh position={[-0.14, 0.65, 0.05]} rotation={[0.5, 0, 0.3]}><capsuleGeometry args={[0.025, 0.35, 4, 10]} />{obsidianMat}</mesh>
-      <mesh position={[0.14, 0.65, 0.05]} rotation={[0.5, 0, -0.3]}><capsuleGeometry args={[0.025, 0.35, 4, 10]} />{obsidianMat}</mesh>
-
-      {/* Dramatic Rim Lighting (Backlights the silhouette) */}
-      <pointLight position={[0, 0.5, -0.5]} intensity={1.8} color="#FF33AA" distance={3} />
-      <pointLight position={[0.3, 0.8, -0.3]} intensity={1.0} color="#4488FF" distance={2} />
-    </group>
-  );
-}
-
-/* ── CIGARETTE ── */
-function Cigarette({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  const eRef = useRef<THREE.Mesh>(null);
-  const smokeRef = useRef<THREE.Points>(null);
-  const smokePos = useMemo(() => { const a = new Float32Array(50*3); for (let i=0;i<50;i++) { a[i*3]=rng(0.04); a[i*3+1]=Math.random()*1.6; a[i*3+2]=rng(0.04); } return a; }, []);
-
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    ref.current.position.x += delta * spd * 0.14;
-    ref.current.position.y += Math.sin(ref.current.position.x * 0.3) * delta * 0.3;
-    ref.current.rotation.z += delta * 0.25;
-    if (eRef.current) (eRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 3 + Math.random() * 1.5;
-    if (smokeRef.current) {
-      const a = smokeRef.current.geometry.attributes.position.array as Float32Array;
-      for (let i=0;i<50;i++) { a[i*3+1] += delta*(0.4+Math.random()*0.35); a[i*3] += (Math.random()-0.5)*delta*0.07; if (a[i*3+1] > 1.6) { a[i*3+1]=0; a[i*3]=rng(0.04); } }
-      smokeRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-
-  return (
-    <group ref={ref} position={pos}>
-      <mesh position={[0, -0.425, 0]}><cylinderGeometry args={[0.032, 0.032, 0.25, 14]} /><meshStandardMaterial color="#C4A060" roughness={0.65} /></mesh>
-      <mesh position={[0, 0, 0]}><cylinderGeometry args={[0.032, 0.032, 0.6, 14]} /><meshStandardMaterial color="#FAFAF6" roughness={0.4} /></mesh>
-      <mesh ref={eRef} position={[0, 0.3, 0]}><sphereGeometry args={[0.025, 10, 10]} /><meshStandardMaterial color="#FF4400" emissive="#FFCC00" emissiveIntensity={3.5} roughness={0.1} /></mesh>
-      <points ref={smokeRef} position={[0, 0.3, 0.02]}><bufferGeometry><bufferAttribute attach="attributes-position" count={50} array={smokePos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.016} color="#AAA" transparent opacity={0.15} depthWrite={false} blending={THREE.NormalBlending} /></points>
-      <pointLight position={[0, 0.3, 0]} intensity={0.4} color="#FF7700" distance={2} />
-    </group>
-  );
-}
-
-/* ── CANNABIS LEAF ── */
-function LeafGeom() {
-  const shape = useMemo(() => {
-    const s = new THREE.Shape();
-    function leaflet(angle: number, len: number) {
-      const cos = Math.cos(angle), sin = Math.sin(angle), w = len * 0.28;
-      s.moveTo(cos*len*0.05, sin*len*0.05);
-      s.bezierCurveTo(cos*len*0.3 - sin*w, sin*len*0.3 + cos*w, cos*len*0.7 - sin*w*0.5, sin*len*0.7 + cos*w*0.5, cos*len - sin*w*0.15, sin*len + cos*w*0.15);
-      s.bezierCurveTo(cos*len*0.85, sin*len*0.85, cos*len*0.85, sin*len*0.85, cos*len, sin*len);
-      s.bezierCurveTo(cos*len*0.7 + sin*w*0.5, sin*len*0.7 - cos*w*0.5, cos*len*0.3 + sin*w, sin*len*0.3 - cos*w, cos*len*0.05, sin*len*0.05);
-    }
-    leaflet(Math.PI/2, 0.9); leaflet(Math.PI/6, 0.75); leaflet(-Math.PI/6, 0.75);
-    leaflet(-Math.PI/2, 0.55); leaflet(Math.PI*5/6, 0.55); leaflet(-Math.PI*5/6, 0.55);
-    leaflet(Math.PI/2+0.35, 0.5);
-    return new THREE.ShapeGeometry(s);
-  }, []);
-  return <primitive object={shape} attach="geometry" />;
-}
-
-function CannabisLeaf({ pos, spd }: { pos: [number,number,number]; spd: number }) {
-  const ref = useRef<THREE.Group>(null);
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    ref.current.rotation.z += delta * spd * 0.4;
-    ref.current.position.x += delta * spd * 0.08;
-    ref.current.position.y += Math.sin(ref.current.position.x * 0.4) * delta * 0.25;
-  });
-  const lit = Math.random() > 0.35;
-  return (
-    <group ref={ref} position={pos}>
-      <mesh scale={[0.35, 0.35, 0.35]}>
-        <LeafGeom />
-        <meshStandardMaterial
-          color={lit ? "#D48D1D" : "#2E7D32"}
-          roughness={lit ? 0.3 : 0.4}
-          side={THREE.DoubleSide}
-          emissive={lit ? "#442200" : "#0A1A0A"}
-          emissiveIntensity={lit ? 0.8 : 0.2}
-        />
-      </mesh>
-      {lit && <pointLight position={[0, -0.05, 0.05]} intensity={0.25} color="#FFCC88" distance={1.5} />}
-    </group>
-  );
-}
-
-/* ── TECH DEVICE WITH SCREEN GLOW ── */
-function Device({ pos, spd, type }: { pos: [number,number,number]; spd: number; type: "phone"|"tablet"|"laptop" }) {
-  const ref = useRef<THREE.Group>(null);
-  const screenRef = useRef<THREE.Mesh>(null);
-  const lightRef = useRef<THREE.PointLight>(null);
-
-  const dims = type === "phone" ? [0.38, 0.7] : type === "tablet" ? [0.65, 0.5] : [0.8, 0.5];
-  const cracks = useMemo(() => Array.from({length:5}, () => ({x:rng(dims[0]*0.7), y:rng(dims[1]*0.5), len:0.08+Math.random()*0.25, ang:Math.random()*Math.PI})), []);
-
-  useFrame((_s, delta) => {
-    if (!ref.current) return;
-    ref.current.rotation.y += delta * spd * 0.3;
-    ref.current.rotation.x = Math.sin(_s.clock.elapsedTime * spd * 0.5) * 0.25;
-    ref.current.position.x += delta * spd * 0.08;
-    ref.current.position.y += Math.cos(ref.current.position.x * 0.3) * delta * 0.18;
-
-    if (screenRef.current && lightRef.current) {
-      // Get screen's world-space normal to determine how much it faces camera
-      const normal = new THREE.Vector3(0, 0, 1);
-      screenRef.current.getWorldDirection(normal);
-      // Light intensity varies based on screen visibility
-      const dot = Math.abs(normal.dot(new THREE.Vector3(0, 0, -1)));
-      lightRef.current.intensity = 0.15 + dot * 0.4 + Math.random() * 0.05;
-      (screenRef.current.material as THREE.MeshStandardMaterial).emissiveIntensity = 0.25 + dot * 0.5;
-    }
-  });
-
-  return (
-    <group ref={ref} position={pos}>
-      {/* Body */}
-      <mesh>
-        <boxGeometry args={[dims[0]+0.06, dims[1]+0.06, 0.03]} />
-        <meshStandardMaterial color="#1A1A1A" roughness={0.15} metalness={0.9} />
-      </mesh>
-      {/* Screen */}
-      <mesh ref={screenRef} position={[0, 0, 0.017]}>
-        <planeGeometry args={[dims[0], dims[1]]} />
-        <meshStandardMaterial color="#0A0A1A" roughness={0.05} metalness={0.5} emissive="#3366FF" emissiveIntensity={0.5} />
-      </mesh>
-      {/* Cracks */}
-      {cracks.map((c, i) => (
-        <mesh key={i} position={[c.x, c.y, 0.018]} rotation={[0,0,c.ang]}>
-          <planeGeometry args={[0.005, c.len]} />
-          <meshBasicMaterial color="#88AAFF" transparent opacity={0.35} />
-        </mesh>
-      ))}
-      {/* Screen glow light — illuminates nearby objects */}
-      <pointLight ref={lightRef} position={[0, 0, 0.2]} intensity={0.35} color="#3366FF" distance={2.5} />
-    </group>
-  );
-}
-
-/* ── PILL ── */
-function Pill({ pos, color, spd }: { pos: [number,number,number]; color: string; spd: number }) {
+function Sigil({ position, geometry, rotationSpeed, scale }: SigilProps) {
   const ref = useRef<THREE.Mesh>(null);
-  useFrame((_s, delta) => {
+
+  useFrame((state) => {
     if (!ref.current) return;
-    ref.current.rotation.x += delta * spd * 0.6;
-    ref.current.rotation.z += delta * spd * 0.7;
-    ref.current.position.x += delta * spd * 0.1;
-    ref.current.position.y += Math.sin(ref.current.position.x * 0.6) * delta * 0.35;
+    const t = state.clock.elapsedTime;
+    ref.current.rotation.x += rotationSpeed[0] * 0.003;
+    ref.current.rotation.y += rotationSpeed[1] * 0.003;
+    ref.current.rotation.z += rotationSpeed[2] * 0.003;
+
+    // Breathing opacity
+    const mat = ref.current.material as THREE.MeshBasicMaterial;
+    mat.opacity = 0.06 + Math.sin(t * 0.3 + position[0]) * 0.03;
   });
+
+  const geomElement = useMemo(() => {
+    switch (geometry) {
+      case "icosahedron": return <icosahedronGeometry args={[1, 1]} />;
+      case "torus": return <torusGeometry args={[1, 0.3, 8, 16]} />;
+      case "torusKnot": return <torusKnotGeometry args={[0.8, 0.25, 64, 8]} />;
+      case "octahedron": return <octahedronGeometry args={[1, 0]} />;
+      case "dodecahedron": return <dodecahedronGeometry args={[1, 0]} />;
+    }
+  }, [geometry]);
+
   return (
-    <mesh ref={ref} position={pos} rotation={[Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI]}>
-      <capsuleGeometry args={[0.035+Math.random()*0.05, 0.15+Math.random()*0.2, 4, 8]} />
-      <meshStandardMaterial color={color} roughness={0.22} metalness={0.3} />
+    <mesh ref={ref} position={position} scale={scale}>
+      {geomElement}
+      <meshBasicMaterial
+        wireframe
+        color="#ffffff"
+        transparent
+        opacity={0.03}
+        depthWrite={false}
+      />
     </mesh>
   );
 }
 
-/* ── AMBIENT DUST ── */
-function Dust() {
-  const c = 400;
-  const pos = useMemo(() => { const p = new Float32Array(c*3); for (let i=0;i<c;i++) { p[i*3]=rng(18); p[i*3+1]=rng(12); p[i*3+2]=rng(8); } return p; }, []);
-  const ref = useRef<THREE.Points>(null);
-  useFrame((_,d) => {
-    if (!ref.current) return;
-    ref.current.rotation.y += d * 0.02;
-    const a = ref.current.geometry.attributes.position.array as Float32Array;
-    for (let i=0;i<c;i++) { a[i*3+1] += d*0.04; if (a[i*3+1] > 6) a[i*3+1] = -6; }
-    ref.current.geometry.attributes.position.needsUpdate = true;
+const sigils: SigilProps[] = [
+  { position: [-8, 4, -16], geometry: "icosahedron", rotationSpeed: [0.4, 0.6, 0.2], scale: 1.2 },
+  { position: [7, -3, -20], geometry: "torus", rotationSpeed: [0.3, -0.5, 0.4], scale: 1.5 },
+  { position: [-4, -5, -14], geometry: "torusKnot", rotationSpeed: [-0.2, 0.4, 0.3], scale: 0.8 },
+  { position: [9, 5, -18], geometry: "octahedron", rotationSpeed: [0.5, 0.3, -0.4], scale: 1.0 },
+  { position: [0, 6, -22], geometry: "dodecahedron", rotationSpeed: [-0.3, 0.5, 0.2], scale: 1.3 },
+  { position: [-10, -2, -17], geometry: "icosahedron", rotationSpeed: [0.2, -0.3, 0.5], scale: 0.9 },
+  { position: [6, -6, -15], geometry: "torus", rotationSpeed: [-0.4, 0.2, -0.3], scale: 1.1 },
+];
+
+/* GodRays removed — caused visible hard-edged rectangle behind hero text */
+
+/* ═══════════════════════════════════════
+   SCENE CONTAINER — with mouse parallax
+   ═══════════════════════════════════════ */
+function SceneContent({ mouse, isMobile }: { mouse: React.MutableRefObject<[number, number]>; isMobile: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
+  const targetX = useRef(0);
+  const targetY = useRef(0);
+
+  useFrame(() => {
+    if (!groupRef.current) return;
+    const [mx, my] = mouse.current;
+    // Mouse parallax: ±2% with 0.08 damping
+    targetX.current += (mx * 0.24 - targetX.current) * 0.08;
+    targetY.current += (my * 0.16 - targetY.current) * 0.08;
+    groupRef.current.position.x = targetX.current;
+    groupRef.current.position.y = targetY.current;
   });
-  return <points ref={ref}><bufferGeometry><bufferAttribute attach="attributes-position" count={c} array={pos} itemSize={3} /></bufferGeometry><pointsMaterial size={0.012} color="#FFF5E1" transparent opacity={0.2} blending={THREE.AdditiveBlending} depthWrite={false} /></points>;
-}
 
-/* ── SCENE ── */
-const pillColors = ["#FF3355","#3355FF","#F8F8FF","#FFBB00","#22CC55","#FF6622","#CC44DD","#44DDCC"];
-const deviceTypes: ("phone"|"tablet"|"laptop")[] = ["phone","phone","phone","phone","tablet","tablet","tablet","laptop","laptop","laptop"];
-
-function SceneContent() {
   return (
-    <>
-      <directionalLight position={[5, 4, 3]} intensity={1.2} color="#FFCC88" />
-      <directionalLight position={[-4, 1, -2]} intensity={0.8} color="#4488FF" />
-      <directionalLight position={[0, -1, -4]} intensity={0.4} color="#FFCCAA" />
-      <ambientLight intensity={0.25} color="#0A0A1A" />
+    <group ref={groupRef}>
+      <VoidParticles mouse={mouse} isMobile={isMobile} />
+      {sigils.map((s, i) => (
+        <Sigil key={i} {...s} />
+      ))}
 
-      {/* 10 cigarettes with ember glow */}
-      {[...Array(10)].map((_, i) => <Cigarette key={`c${i}`} pos={rp()} spd={0.3+Math.random()*0.8} />)}
-      {/* 5 whiskey glasses */}
-      {[...Array(5)].map((_, i) => <WhiskeyGlass key={`w${i}`} pos={rp()} spd={0.2+Math.random()*0.5} />)}
-      {/* 5 beer mugs */}
-      {[...Array(5)].map((_, i) => <BeerMug key={`b${i}`} pos={rp()} spd={0.2+Math.random()*0.5} />)}
-      {/* 35 pills */}
-      {[...Array(35)].map((_, i) => <Pill key={`p${i}`} pos={rp()} color={pillColors[i%pillColors.length]} spd={0.3+Math.random()*1} />)}
-      {/* 18 cannabis leaves (some lit, some not) */}
-      {[...Array(18)].map((_, i) => <CannabisLeaf key={`l${i}`} pos={rp()} spd={0.2+Math.random()*0.5} />)}
-      {/* 10 tech devices with screen glow */}
-      {[...Array(10)].map((_, i) => <Device key={`d${i}`} pos={rp()} spd={0.2+Math.random()*0.5} type={deviceTypes[i]} />)}
-      {/* 6 silhouettes */}
-      {[...Array(6)].map((_, i) => <Silhouette key={`s${i}`} pos={rp()} spd={0.15+Math.random()*0.3} />)}
-      {/* 5 tissue boxes */}
-      {[...Array(5)].map((_, i) => <TissueBox key={`t${i}`} pos={rp()} spd={0.15+Math.random()*0.3} />)}
-      {/* 400 dust */}
-      <Dust />
-    </>
+      {/* Subtle rim lights — no GodRays */}
+      <pointLight position={[0, -8, 2]} intensity={0.3} color="#F59E0B" distance={20} />
+      <pointLight position={[-4, -6, 0]} intensity={0.15} color="#3B82F6" distance={15} />
+      <ambientLight intensity={0.01} color="#0A0A1A" />
+    </group>
   );
 }
 
+/* ═══════════════════════════════════════
+   EXPORTED COMPONENT
+   Dynamic import with ssr: false handled by consumer
+   ═══════════════════════════════════════ */
 export default function ThreeBackground() {
+  const mouse = useRef<[number, number]>([0, 0]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    // Normalize to [-1, 1]
+    mouse.current = [
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1,
+    ];
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-0">
-      <Canvas camera={{ position: [0, 0, 7], fov: 50 }} dpr={[1, 2]} gl={{ antialias: true, alpha: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }} style={{ background: "transparent" }}>
-        <SceneContent />
+    <div
+      className="fixed inset-0 z-0"
+      onPointerMove={handlePointerMove}
+    >
+      <Canvas
+        camera={{ position: [0, 0, 12], fov: 60 }}
+        dpr={[1, 1.5]}
+        gl={{
+          antialias: false,
+          alpha: true,
+          toneMapping: THREE.NoToneMapping,
+          powerPreference: "high-performance",
+        }}
+        style={{ background: "transparent" }}
+      >
+        <fog attach="fog" args={["#000005", 5, 25]} />
+        <SceneContent mouse={mouse} isMobile={isMobile} />
       </Canvas>
     </div>
   );

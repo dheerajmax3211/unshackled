@@ -65,7 +65,7 @@ const borderColors = {
 
 export default function ScienceSection() {
   return (
-    <section id="science" className="relative py-32 bg-surface-darkest">
+    <section id="science" className="relative py-32 bg-surface-darkest overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <SectionHeader
           title="Built on behavioral science"
@@ -107,7 +107,7 @@ export default function ScienceSection() {
                       >
                         <pillar.icon className="w-5 h-5" strokeWidth={1.5} />
                       </div>
-                      <h3 className="text-heading-sm font-semibold text-text-primary">
+                      <h3 className="text-heading-sm font-display font-semibold text-text-primary">
                         {pillar.headline}
                       </h3>
                     </div>

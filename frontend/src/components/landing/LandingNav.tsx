@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link2Off, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,7 +36,7 @@ export default function LandingNav() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-500",
         scrolled
-          ? "bg-surface-darkest/80 backdrop-blur-glass border-b border-white/[0.06] shadow-glass"
+          ? "glass border-b border-white/[0.06]"
           : "bg-transparent"
       )}
     >
@@ -45,10 +45,14 @@ export default function LandingNav() {
           onClick={() => scrollTo("#hero")}
           className="flex items-center gap-2.5 group"
         >
-          <div className="w-9 h-9 rounded-glass-sm bg-brand-amber/15 border border-brand-amber/20 flex items-center justify-center group-hover:bg-brand-amber/25 transition-colors duration-300">
+          <motion.div
+            className="w-9 h-9 rounded-glass-sm bg-brand-amber/15 border border-brand-amber/20 flex items-center justify-center group-hover:bg-brand-amber/25 transition-colors duration-300"
+            animate={{ boxShadow: ["0 0 8px rgb(var(--brand-amber) / 0.15)", "0 0 16px rgb(var(--brand-amber) / 0.25)", "0 0 8px rgb(var(--brand-amber) / 0.15)"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
             <Link2Off className="w-5 h-5 text-brand-amber-light" strokeWidth={1.5} />
-          </div>
-          <span className="text-heading-sm font-semibold text-text-primary tracking-tight">
+          </motion.div>
+          <span className="text-heading-sm font-display font-semibold text-text-primary tracking-tight">
             Unshackled
           </span>
         </button>
@@ -58,9 +62,11 @@ export default function LandingNav() {
             <button
               key={link.label}
               onClick={() => scrollTo(link.href)}
-              className="px-4 py-2 text-body-sm text-text-secondary hover:text-text-primary rounded-glass-sm hover:bg-white/[0.04] transition-all duration-200"
+              className="relative px-4 py-2 text-body-sm text-text-secondary hover:text-text-primary rounded-glass-sm hover:bg-white/[0.04] transition-all duration-200 group"
             >
               {link.label}
+              {/* Underline animation */}
+              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 group-hover:w-[60%] h-px bg-brand-amber/50 transition-all duration-300" />
             </button>
           ))}
         </nav>
@@ -90,7 +96,7 @@ export default function LandingNav() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="md:hidden bg-surface-darkest/95 backdrop-blur-glass border-b border-white/[0.06] overflow-hidden"
+            className="md:hidden glass border-b border-white/[0.06] overflow-hidden"
           >
             <div className="px-6 py-4 flex flex-col gap-2">
               {navLinks.map((link) => (

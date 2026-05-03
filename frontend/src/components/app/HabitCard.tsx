@@ -57,7 +57,12 @@ export function HabitCard({
               {habitName}
             </h4>
             <div className="flex items-center gap-2 text-caption text-text-muted">
-              <Flame className="w-3.5 h-3.5" />
+              <motion.div
+                animate={isActive ? { scale: [1, 1.2, 1], rotate: [0, -5, 5, 0] } : {}}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Flame className={cn("w-3.5 h-3.5", isActive && "text-brand-amber")} />
+              </motion.div>
               <span>{currentStreak} day streak</span>
             </div>
           </div>
@@ -72,16 +77,27 @@ export function HabitCard({
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-caption text-text-muted">
             <span>Progress to 90 days</span>
-            <span>{Math.round(streakProgress)}%</span>
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {Math.round(streakProgress)}%
+            </motion.span>
           </div>
-          <Progress
-            value={streakProgress}
-            className={cn("h-1.5", isActive ? "[&>div]:bg-brand-amber" : "[&>div]:bg-text-subtle")}
-          />
+          <div className="w-full h-1.5 bg-text-subtle/20 rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              whileInView={{ width: `${streakProgress}%` }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              className={cn("h-full rounded-full", isActive ? "bg-brand-amber" : "bg-text-subtle")}
+            />
+          </div>
         </div>
 
         {isActive && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-1">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

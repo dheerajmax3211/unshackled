@@ -58,7 +58,7 @@ export function StatCounter({
     >
       <span
         className={cn(
-          "text-display-sm md:text-display-md lg:text-display-lg font-bold tabular-nums",
+          "text-display-sm md:text-display-md lg:text-display-lg font-display font-bold tabular-nums animate-gradient-drift",
           colorMap[color]
         )}
       >

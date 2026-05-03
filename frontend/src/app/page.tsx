@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 
 import HeroSection from "@/components/landing/HeroSection";
@@ -20,6 +21,7 @@ import { BadgeGrid } from "@/components/app/BadgeGrid";
 import { HabitCard } from "@/components/app/HabitCard";
 import { HabitSelector } from "@/components/app/HabitSelector";
 import { WithdrawalCard } from "@/components/app/WithdrawalCard";
+import { AnimatedSwitch } from "@/components/shared/AnimatedSwitch";
 import { DopamineSuggestionCard } from "@/components/app/DopamineSuggestionCard";
 import { LeaderboardTable } from "@/components/app/LeaderboardTable";
 import { FriendCard } from "@/components/app/FriendCard";
@@ -95,6 +97,18 @@ function ComponentShowcase({
       </div>
       {children}
     </motion.div>
+  );
+}
+
+function NotificationToggle() {
+  const [enabled, setEnabled] = React.useState(true);
+  return (
+    <div className="flex items-center gap-2">
+      <AnimatedSwitch id="notifs" checked={enabled} onChange={setEnabled} />
+      <label htmlFor="notifs" className="text-body-sm text-text-secondary cursor-pointer" onClick={() => setEnabled(!enabled)}>
+        Enable notifications
+      </label>
+    </div>
   );
 }
 
@@ -191,10 +205,7 @@ export default function PreviewPage() {
               <h4 className="text-heading-sm text-text-secondary mb-4">Switch & Avatar</h4>
               <div className="flex items-center gap-8">
                 <div className="flex items-center gap-2">
-                  <Switch id="notifs" />
-                  <label htmlFor="notifs" className="text-body-sm text-text-secondary">
-                    Enable notifications
-                  </label>
+                  <NotificationToggle />
                 </div>
                 <Avatar>
                   <AvatarImage src={mockUserProfile.avatarUrl} />
@@ -318,7 +329,7 @@ export default function PreviewPage() {
               <LevelBadge level={10} levelName="Liberator" size="lg" />
               <LevelBadge level={20} levelName="Unshackled" size="lg" />
             </div>
-            <BadgeGrid badges={mockBadges} />
+            <BadgeGrid badges={mockBadges as any} />
           </GlassCard>
         </ComponentShowcase>
 
@@ -363,11 +374,11 @@ export default function PreviewPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
             <div className="space-y-4">
               <WithdrawalCard
-                message={mockWithdrawalMessages[1]}
+                message={mockWithdrawalMessages[1] as any}
                 currentDay={47}
               />
               <WithdrawalCard
-                message={mockWithdrawalMessages[0]}
+                message={mockWithdrawalMessages[0] as any}
                 currentDay={47}
               />
             </div>
