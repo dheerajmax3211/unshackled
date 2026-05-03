@@ -127,7 +127,7 @@ function Sigil({ position, geometry, rotationSpeed, scale }: SigilProps) {
 
     // Breathing opacity
     const mat = ref.current.material as THREE.MeshBasicMaterial;
-    mat.opacity = 0.06 + Math.sin(t * 0.3 + position[0]) * 0.03;
+    mat.opacity = 0.25 + Math.sin(t * 0.3 + position[0]) * 0.1;
   });
 
   const geomElement = useMemo(() => {
@@ -147,7 +147,8 @@ function Sigil({ position, geometry, rotationSpeed, scale }: SigilProps) {
         wireframe
         color="#ffffff"
         transparent
-        opacity={0.03}
+        opacity={0.25}
+        blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
     </mesh>
