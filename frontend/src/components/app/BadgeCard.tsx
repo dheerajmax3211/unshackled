@@ -80,13 +80,18 @@ export function BadgeCard({ badge, earned, className }: BadgeCardProps) {
       }}
       whileHover={earned ? { scale: 1.05, y: -2 } : undefined}
       className={cn(
-        "glass-card-sm flex flex-col items-center gap-3 p-5 transition-all duration-300",
+        "group glass-card-sm flex flex-col items-center gap-3 p-5 transition-all duration-300 relative overflow-hidden",
         earned && config.glow,
         earned && config.hoverState,
+        earned && config.bg.replace('/10', '/5'), // Subtle base tint
         !earned && "opacity-50 grayscale",
         className
       )}
     >
+      {/* Dynamic background gradient for earned badges to remove the washed-out look */}
+      {earned && (
+        <div className={cn("absolute inset-0 opacity-20 pointer-events-none transition-opacity group-hover:opacity-40", config.bg)} />
+      )}
       <div
         className={cn(
           "w-14 h-14 rounded-full border-2 flex items-center justify-center transition-all",

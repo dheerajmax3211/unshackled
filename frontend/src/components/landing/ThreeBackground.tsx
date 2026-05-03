@@ -43,8 +43,8 @@ function VoidParticles({ mouse, isMobile }: { mouse: React.MutableRefObject<[num
         // Blue shimmer
         col[i3] = 0.23; col[i3 + 1] = 0.51; col[i3 + 2] = 0.96;
       } else {
-        // Soft stardust (brighter for AdditiveBlending on dark themes)
-        const intensity = 0.15 + Math.random() * 0.25;
+        // Bright stardust to cut through dark backgrounds with AdditiveBlending
+        const intensity = 0.4 + Math.random() * 0.4;
         col[i3] = intensity * 0.8; 
         col[i3 + 1] = intensity * 0.9; 
         col[i3 + 2] = intensity;
@@ -82,7 +82,7 @@ function VoidParticles({ mouse, isMobile }: { mouse: React.MutableRefObject<[num
 
     // Subtle ambient rhythm pulse on material
     const mat = ref.current.material as THREE.PointsMaterial;
-    mat.opacity = 0.35 + Math.sin(t * 0.5) * 0.1;
+    mat.opacity = 0.75 + Math.sin(t * 0.5) * 0.15;
   });
 
   return (
@@ -92,10 +92,10 @@ function VoidParticles({ mouse, isMobile }: { mouse: React.MutableRefObject<[num
         <bufferAttribute attach="attributes-color" count={count} array={colors} itemSize={3} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.025}
+        size={0.035}
         vertexColors
         transparent
-        opacity={0.4}
+        opacity={0.7}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         sizeAttenuation

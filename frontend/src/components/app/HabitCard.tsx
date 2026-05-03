@@ -97,7 +97,7 @@ export function HabitCard({
         </div>
 
         {isActive && (
-          <div className="flex gap-2 mt-1">
+          <div className="flex gap-2 mt-4 pt-4 border-t border-white/[0.04]">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
