@@ -25,7 +25,6 @@ export function AnimatedButton({
   const [pressing, setPressing] = useState(false);
   const [ripple, setRipple] = useState(false);
 
-  // Magnetic pull: shift button toward cursor within 80px
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
@@ -49,7 +48,6 @@ export function AnimatedButton({
   }, []);
 
   const handleClick = useCallback(() => {
-    // Visual pulse on click
     setRipple(true);
     setTimeout(() => setRipple(false), 400);
     onClick?.();
@@ -57,11 +55,12 @@ export function AnimatedButton({
 
   const isPremium = variant === "premium";
   const isOutline = variant === "outline";
+  const isDefault = variant === "default";
 
   return (
     <motion.div
       ref={ref}
-      className={cn("relative", isPremium && "conic-border rounded-glass-sm")}
+      className={cn("relative", isPremium && "relative")}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       animate={{
@@ -77,20 +76,53 @@ export function AnimatedButton({
         mass: 0.8,
       }}
       style={{ perspective: "600px" }}
-      whileHover={{ scale: 1.03 }}
+      whileHover={{ scale: 1.04, y: -2 }}
+      whileTap={{ scale: 0.98 }}
     >
+      {/* Premium glow effect */}
+      {isPremium && (
+        <>
+          <motion.div
+            className="absolute -inset-1 rounded-glass-sm bg-gradient-to-r from-brand-amber via-brand-amber-light to-brand-amber blur-sm opacity-0"
+            animate={{ opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <div className="absolute -inset-[1px] rounded-glass-sm bg-gradient-to-r from-brand-amber via-brand-amber-light to-brand-amber opacity-50" />
+        </>
+      )}
+
+      {/* Default variant glow */}
+      {isDefault && (
+        <motion.div
+          className="absolute -inset-1 rounded-glass-sm bg-brand-amber/20 blur-md"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        />
+      )}
+
       <Button
         variant={variant}
         size={size}
         className={cn(
           "relative overflow-hidden will-change-transform",
           isOutline && "group",
+          isPremium && "relative",
           className
         )}
         onClick={handleClick}
         onMouseDown={() => setPressing(true)}
         onMouseUp={() => setPressing(false)}
       >
+        {/* Background shimmer for premium */}
+        {isPremium && (
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            animate={{ x: ["-100%", "100%"] }}
+            transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+          />
+        )}
+
         {/* Outline variant: animated underline */}
         {isOutline && (
           <span className="absolute bottom-2 left-1/2 -translate-x-1/2 h-px bg-text-secondary origin-center scale-x-0 group-hover:scale-x-100 transition-transform duration-300 w-[60%]" />
@@ -99,10 +131,19 @@ export function AnimatedButton({
         {/* Click ripple pulse */}
         {ripple && (
           <motion.span
-            className="absolute inset-0 rounded-[inherit] bg-white/10"
-            initial={{ opacity: 0.4, scale: 0.5 }}
-            animate={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 0.4 }}
+            className="absolute inset-0 rounded-[inherit] bg-white/20"
+            initial={{ opacity: 0.5, scale: 0.5 }}
+            animate={{ opacity: 0, scale: 1.8 }}
+            transition={{ duration: 0.5 }}
+          />
+        )}
+
+        {/* Hover glow for premium */}
+        {isPremium && (
+          <motion.div
+            className="absolute inset-0 rounded-[inherit] bg-white/5 opacity-0"
+            whileHover={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
           />
         )}
 

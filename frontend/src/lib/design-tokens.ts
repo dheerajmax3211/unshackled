@@ -107,4 +107,46 @@ export const motionVariants = {
       transition: { duration: 0.6, ease: designTokens.motion.ease.smooth },
     },
   },
+  dramaticReveal: {
+    hidden: { opacity: 0, y: 60, scale: 0.9, filter: "blur(10px)" },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      filter: "blur(0px)",
+      transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] },
+    },
+  },
+  floatUp: {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, ease: designTokens.motion.ease.smooth },
+    },
+  },
+  slideUpReveal: {
+    hidden: { clipPath: "inset(0 100% 0 0)" },
+    visible: {
+      clipPath: "inset(0 0% 0 0)",
+      transition: { duration: 0.7, ease: designTokens.motion.ease.smooth },
+    },
+  },
+  orbitalReveal: {
+    hidden: { opacity: 0, scale: 0.5, rotate: -180 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: { duration: 0.8, ease: [0.34, 1.56, 0.64, 1] },
+    },
+  },
+  springBounce: {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 200, damping: 15 },
+    },
+  },
 };
