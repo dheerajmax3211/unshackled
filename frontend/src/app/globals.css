@@ -271,10 +271,52 @@
     transition: background-color var(--theme-transition), color var(--theme-transition);
   }
   ::selection { background-color: rgb(var(--brand-amber) / 0.3); color: rgb(var(--text-primary)); }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: rgb(var(--surface-dark)); }
-  ::-webkit-scrollbar-thumb { background: rgb(var(--surface-light)); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgb(var(--surface-lighter)); }
+
+  /* ── Custom Scrollbar ── */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--surface-light) / 0.5);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.2s ease;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--surface-lighter) / 0.7);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: rgb(var(--brand-amber) / 0.3);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--surface-light) / 0.5) transparent;
+  }
+
+  /* ── Safe area for mobile notches ── */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
   [data-theme="dawn"] ::selection { color: rgb(255 255 255); }
 
   /* Display headings use Syne */

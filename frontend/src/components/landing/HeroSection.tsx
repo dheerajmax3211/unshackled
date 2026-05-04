@@ -65,18 +65,33 @@ function FloatingOrb({
 }
 
 /* ═══════════════════════════════════════
-   DECORATIVE STARS
+   DECORATIVE STARS — deterministic positions to avoid hydration mismatch
    ═══════════════════════════════════════ */
 function DecorativeStars() {
   const stars = useMemo(() => {
-    return Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      size: Math.random() * 2 + 1,
-      delay: Math.random() * 3,
-      duration: Math.random() * 2 + 2,
-    }));
+    const seed = [
+      { left: 5, top: 10, size: 1.5, delay: 0.5, duration: 2.5 },
+      { left: 15, top: 25, size: 2, delay: 1.2, duration: 3 },
+      { left: 25, top: 8, size: 1, delay: 0.8, duration: 2 },
+      { left: 35, top: 40, size: 2.5, delay: 2.1, duration: 3.5 },
+      { left: 45, top: 15, size: 1.2, delay: 0.3, duration: 2.2 },
+      { left: 55, top: 60, size: 1.8, delay: 1.5, duration: 2.8 },
+      { left: 65, top: 35, size: 1, delay: 0.9, duration: 3.2 },
+      { left: 75, top: 70, size: 2, delay: 2.3, duration: 2.6 },
+      { left: 85, top: 20, size: 1.5, delay: 1.1, duration: 3 },
+      { left: 95, top: 50, size: 1.2, delay: 0.7, duration: 2.4 },
+      { left: 10, top: 80, size: 2, delay: 1.8, duration: 3.1 },
+      { left: 20, top: 55, size: 1, delay: 0.4, duration: 2.7 },
+      { left: 30, top: 90, size: 1.8, delay: 2.0, duration: 2.3 },
+      { left: 50, top: 85, size: 1.5, delay: 1.3, duration: 3.3 },
+      { left: 60, top: 45, size: 2, delay: 0.6, duration: 2.9 },
+      { left: 70, top: 75, size: 1.2, delay: 1.7, duration: 3.4 },
+      { left: 80, top: 30, size: 1, delay: 0.2, duration: 2.1 },
+      { left: 90, top: 65, size: 1.8, delay: 2.2, duration: 3 },
+      { left: 40, top: 5, size: 1.5, delay: 1.0, duration: 2.6 },
+      { left: 3, top: 48, size: 2, delay: 1.4, duration: 2.8 },
+    ];
+    return seed.map((s, i) => ({ id: i, ...s }));
   }, []);
 
   return (
@@ -86,8 +101,8 @@ function DecorativeStars() {
           key={star.id}
           className="absolute bg-white rounded-full"
           style={{
-            left: star.left,
-            top: star.top,
+            left: `${star.left}%`,
+            top: `${star.top}%`,
             width: star.size,
             height: star.size,
           }}

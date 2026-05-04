@@ -4,6 +4,7 @@ import { ThemeSwitcher } from "@/components/shared/ThemeSwitcher";
 import { SmoothScroll } from "@/components/shared/SmoothScroll";
 import { ScrollProgress } from "@/components/shared/ScrollProgress";
 import ErrorBoundary from "@/components/shared/ErrorBoundary";
+import { ToastProvider } from "@/components/shared/Toast";
 import "./globals.css";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://unshackled.app";
@@ -105,13 +106,13 @@ export default function RootLayout({
       <body className="min-h-screen antialiased">
         <ErrorBoundary>
           <ThemeProvider>
-            <a
-              href="#main-content"
-              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-brand-amber focus:text-surface-darkest focus:font-medium"
-            >
-              Skip to main content
-            </a>
-            <ThemeProvider>
+            <ToastProvider>
+              <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-brand-amber focus:text-surface-darkest focus:font-medium"
+              >
+                Skip to main content
+              </a>
               <SmoothScroll>
                 <main id="main-content">
                   {children}
@@ -119,7 +120,7 @@ export default function RootLayout({
                 <ScrollProgress />
                 <ThemeSwitcher />
               </SmoothScroll>
-            </ThemeProvider>
+            </ToastProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>
