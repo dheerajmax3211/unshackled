@@ -57,7 +57,7 @@ export function GlassCard({
     const normalX = Math.max(-1, Math.min(1, (e.clientX - centerX) / (rect.width / 2)));
     const normalY = Math.max(-1, Math.min(1, (e.clientY - centerY) / (rect.height / 2)));
 
-    setTiltStyle({ rotateX: -normalY * 6, rotateY: normalX * 10 });
+    setTiltStyle({ rotateX: -normalY * 1.5, rotateY: normalX * 2 });
     setSpotlightPos({
       x: ((e.clientX - rect.left) / rect.width) * 100,
       y: ((e.clientY - rect.top) / rect.height) * 100,
@@ -110,9 +110,8 @@ export function GlassCard({
         animate={{
           rotateX: tiltStyle.rotateX,
           rotateY: tiltStyle.rotateY,
-          scale: isHovered ? 1.02 : 1,
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        transition={{ type: "spring", stiffness: 50, damping: 30 }}
         className={cn(
           "glass-card preserve-3d will-change-transform relative",
           paddingMap[padding],
